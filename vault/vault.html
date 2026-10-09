@@ -1,0 +1,1516 @@
+<title>재혁 Vault</title>
+<style>
+:root{
+  --canvas:#ffffff; --bg:#ffffff; --side:#f5f5f7; --ink:#1d1d1f; --ink-2:#6e6e73;
+  --hair:rgba(29,29,31,.10); --hair-2:rgba(29,29,31,.05); --edge:rgba(29,29,31,.16);
+  --fill:#0071e3; --link:#0066cc; --on-fill:#ffffff;
+  --g-subject:#2f6fe0; --g-activity:#12a07a; --g-reading:#d98a1c; --g-award:#e0584b; --g-career:#8b5cf6; --g-admission:#d6457f; --g-daily:#0e9bb0; --g-etc:#8a919e;
+  --display:"SF Pro Display",-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --text:"SF Pro Text",-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --lw:264px; --rw:320px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --canvas:#0b0b0c; --bg:#141415; --side:#1d1d1f; --ink:#f5f5f7; --ink-2:rgba(245,245,247,.58);
+    --hair:rgba(245,245,247,.10); --hair-2:rgba(245,245,247,.05); --edge:rgba(245,245,247,.14);
+    --link:#2997ff;
+    --g-subject:#6aa1ff; --g-activity:#4fd1a5; --g-reading:#f4b35e; --g-award:#ff8a7a; --g-career:#b79cff; --g-admission:#ff86b4; --g-daily:#5fd0e0; --g-etc:#a3abb8;
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#0b0b0c; --bg:#141415; --side:#1d1d1f; --ink:#f5f5f7; --ink-2:rgba(245,245,247,.58);
+  --hair:rgba(245,245,247,.10); --hair-2:rgba(245,245,247,.05); --edge:rgba(245,245,247,.14);
+  --link:#2997ff;
+  --g-subject:#6aa1ff; --g-activity:#4fd1a5; --g-reading:#f4b35e; --g-award:#ff8a7a; --g-career:#b79cff; --g-admission:#ff86b4; --g-daily:#5fd0e0; --g-etc:#a3abb8;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:400 14px/1.5 var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--fill);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.dot.ring{background:transparent!important;box-shadow:inset 0 0 0 1.5px currentColor}
+
+/* layout */
+.app{display:grid;grid-template-columns:var(--lw) minmax(0,1fr) var(--rw);height:100%;transition:grid-template-columns .25s ease}
+.app.no-left{grid-template-columns:0 minmax(0,1fr) var(--rw)}
+.app.no-right{grid-template-columns:var(--lw) minmax(0,1fr) 0}
+.app.no-left.no-right{grid-template-columns:0 minmax(0,1fr) 0}
+.left,.right{background:var(--side);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.left{border-right:1px solid var(--hair)}
+.right{border-left:1px solid var(--hair)}
+.no-left .left{border-right:0} .no-right .right{border-left:0}
+.center{display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:980px;white-space:nowrap;font:400 17px/1 var(--text);height:44px;padding:11px 21px;border:1px solid transparent}
+.btn.sm{font-size:14px;height:36px;padding:8px 15px}
+.btn.xs{font-size:12px;height:28px;padding:5px 12px}
+.btn.fill{background:var(--fill);color:var(--on-fill)} .btn.fill:hover{filter:brightness(1.08)}
+.btn.line{background:transparent;color:var(--link);border-color:var(--link)} .btn.line:hover{background:var(--hair-2)}
+.btn.plain{background:transparent;color:var(--ink);border-color:var(--hair)} .btn.plain:hover{background:var(--hair-2)}
+.btn[disabled]{opacity:.4;cursor:default}
+.icon{width:32px;height:32px;border-radius:980px;border:0;background:transparent;display:inline-grid;place-items:center;color:var(--ink-2);font-size:16px;flex:none}
+.icon:hover{background:var(--hair-2);color:var(--ink)}
+.link{border:0;background:none;padding:0;color:var(--link);font:inherit;cursor:pointer;text-align:left}
+.link:hover{text-decoration:underline}
+
+/* left */
+.l-head{padding:16px 16px 10px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .mark{width:22px;height:22px;border-radius:50%;background:conic-gradient(from 200deg,var(--g-subject),var(--g-career),var(--g-admission),var(--g-award),var(--g-reading),var(--g-activity),var(--g-subject));opacity:.9}
+.brand h1{font:600 17px/1 var(--display);margin:0;flex:1}
+.l-sub{font-size:12px;color:var(--ink-2);margin:6px 0 12px}
+.quick{width:100%;justify-content:space-between;background:var(--bg);border-color:var(--hair);color:var(--ink-2)}
+.quick kbd{font:400 12px var(--text)}
+.seg{display:flex;background:var(--hair-2);border-radius:980px;padding:2px}
+.seg button{flex:1;border:0;background:transparent;border-radius:980px;height:28px;font-size:12px;color:var(--ink-2)}
+.seg button[aria-selected="true"]{background:var(--bg);color:var(--ink)}
+.l-head .seg{margin-top:10px}
+.l-body{flex:1;overflow:auto;padding:4px 8px 16px}
+.folder > button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;border-radius:8px;padding:6px 8px;font-size:12px;color:var(--ink-2)}
+.folder > button:hover{background:var(--hair-2)}
+.folder > button .chev{width:10px;transition:transform .15s;display:inline-block}
+.folder.closed > button .chev{transform:rotate(-90deg)}
+.folder.closed > .files{display:none}
+.folder > button .n{margin-left:auto}
+.file{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;border-radius:8px;padding:5px 8px 5px 26px;text-align:left;font-size:14px;color:var(--ink)}
+.file:hover{background:var(--hair-2)}
+.file.on{background:var(--bg)}
+.file .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file .m{font-size:12px;color:var(--ink-2)}
+.tagcloud{display:flex;flex-wrap:wrap;gap:4px;padding:4px 8px}
+.tagcloud button{border:0;background:var(--hair-2);border-radius:980px;padding:3px 9px;font-size:12px;color:var(--ink-2)}
+.tagcloud button:hover,.tagcloud button.on{color:var(--link)}
+.sub-h{font-size:12px;color:var(--ink-2);margin:16px 8px 6px;display:flex;justify-content:space-between}
+.filter{width:100%;height:32px;border-radius:980px;border:1px solid var(--hair);background:var(--bg);padding:0 14px;margin:6px 0 4px;font-size:14px}
+.filter::placeholder{color:var(--ink-2)}
+.empty{font-size:12px;color:var(--ink-2);padding:6px 8px;margin:0}
+.task{display:flex;gap:9px;align-items:flex-start;padding:5px 8px;border-radius:8px;font-size:14px}
+.task:hover{background:var(--hair-2)}
+.task input{margin:3px 0 0;accent-color:var(--fill);width:15px;height:15px;flex:none}
+.task span{flex:1}
+.lint{margin:10px 0 14px}
+.lint h2{font:400 14px var(--text);margin:0 8px 2px;display:flex;justify-content:space-between}
+.lint h2 span{color:var(--ink-2);font-size:12px}
+.lint p.d{font-size:12px;color:var(--ink-2);margin:0 8px 6px}
+.lint .row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;font-size:14px}
+.lint .row:hover{background:var(--hair-2)}
+.lint .row .t{flex:1;min-width:0}
+.lint .row small{display:block;font-size:12px;color:var(--ink-2)}
+.log{list-style:none;margin:6px 0;padding:0}
+.log li{padding:8px;border-bottom:1px solid var(--hair-2);font-size:14px}
+.log .when,.log .op{font-size:12px;color:var(--ink-2)} .log .op{margin-right:6px}
+
+/* tabs */
+.tabs{display:flex;align-items:center;gap:2px;height:48px;padding:0 8px;border-bottom:1px solid var(--hair);background:var(--bg);overflow-x:auto;scrollbar-width:none;flex:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{display:flex;align-items:center;gap:7px;height:34px;max-width:200px;border:0;background:transparent;border-radius:10px;padding:0 6px 0 12px;font-size:14px;color:var(--ink-2);flex:none}
+.tab:hover{background:var(--hair-2)}
+.tab.on{background:var(--side);color:var(--ink)}
+.tab .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab .x{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:14px;color:var(--ink-2);opacity:0}
+.tab:hover .x,.tab.on .x{opacity:1}
+.tab .x:hover{background:var(--hair)}
+.tab.graph{padding-right:12px}
+.tabs .spacer{flex:1;min-width:8px}
+.views{position:relative;flex:1;min-height:0}
+.view{position:absolute;inset:0}
+
+/* graph */
+.graph-view{background:var(--canvas)}
+#graph{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#graph.drag{cursor:grabbing} #graph.on-node{cursor:pointer}
+.g-tools{position:absolute;top:14px;right:14px;display:flex;gap:6px;z-index:3}
+.g-tools .icon,.g-zoom .icon{background:var(--bg);border:1px solid var(--hair);width:36px;height:36px}
+.g-zoom{position:absolute;right:14px;bottom:14px;display:flex;gap:6px;z-index:3}
+.g-legend{position:absolute;left:14px;bottom:14px;display:flex;flex-wrap:wrap;gap:4px;max-width:calc(100% - 180px);z-index:3}
+.g-legend button{display:flex;align-items:center;gap:6px;border:1px solid var(--hair);background:var(--bg);border-radius:980px;padding:4px 10px;font-size:12px;color:var(--ink)}
+.g-legend button[aria-pressed="false"]{opacity:.45}
+.g-hint{position:absolute;left:14px;top:14px;font-size:12px;color:var(--ink-2);z-index:3;pointer-events:none}
+.pop{position:absolute;top:58px;right:14px;width:250px;background:var(--bg);border:1px solid var(--hair);border-radius:18px;padding:14px 16px;z-index:4}
+.pop h3{font:400 12px var(--text);color:var(--ink-2);margin:0 0 6px}
+.pop label{display:flex;align-items:center;justify-content:space-between;font-size:14px;padding:5px 0}
+.pop input[type=checkbox]{accent-color:var(--fill);width:16px;height:16px}
+.pop input[type=range]{width:100%;accent-color:var(--fill)}
+.preview{position:absolute;width:260px;background:var(--bg);border:1px solid var(--hair);border-radius:14px;padding:12px 14px;pointer-events:none;z-index:5;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.preview.show{opacity:1;transform:none}
+.preview .pt{font:600 14px/1.3 var(--text);margin:0 0 2px;display:flex;gap:7px;align-items:center}
+.preview .pm{font-size:12px;color:var(--ink-2);margin:0 0 6px}
+.preview .pb{font-size:12px;color:var(--ink);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;margin:0;line-height:1.55}
+.stage-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--ink-2);pointer-events:none;z-index:2}
+.stage-empty strong{display:block;font:400 28px/1.2 var(--display);color:var(--ink);margin-bottom:6px}
+
+/* doc */
+.note-view{overflow:auto;background:var(--bg)}
+.doc{max-width:760px;margin:0 auto;padding:40px 48px 96px}
+.crumb{font-size:12px;color:var(--ink-2);display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.d-title{width:100%;border:0;background:transparent;font:600 40px/1.15 var(--display);letter-spacing:-.015em;padding:0;margin:0 0 14px;resize:none;overflow:hidden}
+.d-title:focus{outline:none}
+.props{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:22px}
+.pchip{display:inline-flex;align-items:center;gap:6px;height:28px;border-radius:980px;background:var(--side);padding:0 4px 0 11px;font-size:12px;color:var(--ink-2)}
+.pchip select{border:0;background:transparent;font-size:12px;color:var(--ink);padding:0 8px 0 0;appearance:none;-webkit-appearance:none;cursor:pointer}
+.pchip select:disabled{cursor:default}
+.pchip.static{padding-right:11px}
+.d-bar{display:flex;align-items:center;gap:8px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.d-bar .spacer{flex:1}
+.d-bar .state{font-size:12px;color:var(--ink-2)}
+.md{font:400 17px/1.7 var(--text)}
+.md h1,.md h2,.md h3{font-family:var(--display);letter-spacing:-.01em;margin:30px 0 8px;line-height:1.25}
+.md h1{font-weight:400;font-size:28px} .md h2{font-weight:600;font-size:21px} .md h3{font-weight:600;font-size:17px}
+.md > :first-child{margin-top:0}
+.md p{margin:0 0 14px}
+.md ul,.md ol{margin:0 0 14px;padding-left:24px}
+.md li{margin:3px 0}
+.md li::marker{color:var(--ink-2)}
+.md li.task-li{list-style:none;margin-left:-24px;display:flex;gap:10px;align-items:flex-start}
+.md li.task-li input{margin:7px 0 0;accent-color:var(--fill);width:16px;height:16px;flex:none}
+.md li.task-li.done > span{color:var(--ink-2);text-decoration:line-through}
+.md blockquote{margin:0 0 14px;padding:4px 0 4px 16px;border-left:3px solid var(--hair);color:var(--ink-2)}
+.md .tbl{overflow-x:auto;margin:0 0 14px;border:1px solid var(--hair);border-radius:14px}
+.md table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.md th,.md td{padding:7px 12px;text-align:left;border-bottom:1px solid var(--hair-2)}
+.md th{background:var(--side);font-weight:600;color:var(--ink-2);font-size:12px}
+.md tbody tr:last-child td{border-bottom:0}
+.pv .md table{font-size:12px} .pv .md th,.pv .md td{padding:4px 8px}
+.danger-link.armed{color:#e0584b}
+.md code{font:400 14px var(--mono);background:var(--side);border-radius:6px;padding:1px 6px}
+.md pre{background:var(--side);border-radius:14px;padding:14px 16px;overflow:auto;margin:0 0 14px}
+.md pre code{background:none;padding:0}
+.md hr{border:0;border-top:1px solid var(--hair);margin:22px 0}
+.md a,.md .wl{color:var(--link);text-decoration:none;border:0;background:none;padding:0;font:inherit;cursor:pointer}
+.md a:hover,.md .wl:hover{text-decoration:underline}
+.md .wl.ghost{color:var(--ink-2);text-decoration:underline dotted}
+.md .tag{border:0;background:var(--side);border-radius:980px;padding:1px 9px;font:400 14px var(--text);color:var(--ink-2);cursor:pointer}
+.md .tag:hover{color:var(--link)}
+.md-empty{color:var(--ink-2)}
+.editor{position:relative}
+.editor textarea{width:100%;min-height:360px;resize:none;border:0;background:transparent;padding:0;font:400 15px/1.8 var(--mono);color:var(--ink)}
+.editor textarea:focus{outline:none}
+.suggest{position:absolute;left:0;min-width:280px;list-style:none;margin:4px 0 0;padding:6px;background:var(--bg);border:1px solid var(--hair);border-radius:14px;z-index:3}
+.suggest li{padding:7px 10px;border-radius:8px;cursor:pointer;display:flex;gap:8px;align-items:center;font-size:14px}
+.suggest li.on,.suggest li:hover{background:var(--hair-2)}
+.hint{font-size:12px;color:var(--ink-2);margin:10px 0 0}
+.hint code{font:400 12px var(--mono);background:var(--side);border-radius:5px;padding:1px 5px}
+.refs{margin-top:48px;padding-top:20px;border-top:1px solid var(--hair)}
+.refs h2{font:600 14px var(--text);margin:0 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+.refs h2 span{font-weight:400;font-size:12px;color:var(--ink-2)}
+.ref{padding:10px 0;border-bottom:1px solid var(--hair-2)}
+.ref .rt{display:flex;align-items:center;gap:8px;font-size:14px}
+.ref .rs{font-size:14px;color:var(--ink-2);margin:4px 0 0 16px;line-height:1.55}
+.ref .rs mark{background:transparent;color:var(--ink);font-weight:600}
+.ref .rt .spacer{flex:1}
+.danger-link{border:0;background:none;color:var(--ink-2);font-size:12px;padding:0;margin-top:36px}
+.danger-link:hover{color:var(--ink);text-decoration:underline}
+
+/* right */
+.r-head{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 14px;height:48px;border-bottom:1px solid var(--hair);flex:none}
+.r-head .seg{flex:1}
+.r-body{flex:1;overflow:auto;padding:14px 16px 24px}
+.r-sec{margin-bottom:22px}
+.r-sec h3{font:400 12px var(--text);color:var(--ink-2);margin:0 0 8px;display:flex;justify-content:space-between}
+#local{width:100%;height:240px;display:block;border-radius:14px;background:var(--canvas);cursor:pointer}
+.outline a{display:block;font-size:14px;color:var(--ink);text-decoration:none;padding:3px 0;cursor:pointer}
+.outline a:hover{color:var(--link)}
+.outline a.h3{padding-left:14px;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--hair);background:var(--bg);border-radius:980px;padding:4px 11px 4px 9px;font-size:12px;color:var(--ink);max-width:100%}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip:hover{border-color:var(--ink-2)}
+.chip.ghost{border-style:dashed;color:var(--ink-2)}
+.pv-title{font:600 21px/1.25 var(--display);margin:4px 0 4px}
+.pv-meta{font-size:12px;color:var(--ink-2);margin:0 0 12px}
+.pv .md{font-size:14px;line-height:1.65;max-height:340px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 75%,transparent)}
+.pv .md h1{font-size:17px} .pv .md h2{font-size:14px;margin:14px 0 4px} .pv .md h3{font-size:14px}
+.pv .md li.task-li input{margin-top:4px}
+.r-empty{font-size:14px;color:var(--ink-2)}
+.r-empty strong{display:block;font:600 17px var(--display);color:var(--ink);margin-bottom:4px}
+.recent button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;border-radius:8px;padding:6px 6px;font-size:14px;text-align:left;color:var(--ink)}
+.recent button:hover{background:var(--hair-2)}
+.recent .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent .m{font-size:12px;color:var(--ink-2)}
+.stat{display:flex;gap:10px;margin-bottom:22px}
+.stat div{flex:1;background:var(--bg);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font:600 21px var(--display)}
+.stat span{font-size:12px;color:var(--ink-2)}
+
+/* claude */
+.c-wrap{display:flex;flex-direction:column;flex:1;min-height:0}
+.c-log{display:flex;flex-direction:column;gap:14px}
+.msg{white-space:pre-wrap;word-break:break-word;font:400 14px/1.65 var(--text)}
+.msg.me{align-self:flex-end;max-width:90%;background:var(--bg);border-radius:14px;padding:8px 12px}
+.msg.me .lbl{display:block;font-size:12px;color:var(--ink-2)}
+.msg.bot .status{display:block;font-size:12px;color:var(--ink-2);margin-bottom:4px}
+.msg.bot .err{display:block;font-size:12px;color:var(--ink-2);margin-top:8px}
+.msg.bot .acts{display:flex;gap:8px;margin-top:10px;white-space:normal}
+.msg .wl{border:0;background:none;padding:0;font:inherit;color:var(--link);cursor:pointer}
+.msg .wl:hover{text-decoration:underline}
+.c-intro{font-size:14px;color:var(--ink-2)}
+.c-intro p{margin:0 0 10px}
+.c-intro .btn{margin:0 6px 6px 0;white-space:normal;height:auto;min-height:36px;text-align:left}
+.composer{border-top:1px solid var(--hair);padding:10px 12px 12px;flex:none}
+.composer textarea,.composer input,.composer select{width:100%;border:1px solid var(--hair);background:var(--bg);border-radius:14px;padding:9px 12px;resize:none;font-size:14px}
+.composer textarea:focus,.composer input:focus{outline:none;border-color:var(--fill)}
+.composer .row{display:flex;gap:8px;align-items:flex-end;margin-top:8px}
+.composer .row > :first-child{flex:1}
+.composer .note{font-size:12px;color:var(--ink-2)}
+.c-modes{margin-bottom:14px}
+
+/* palette */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:30;display:flex;justify-content:center;align-items:flex-start;padding-top:14vh}
+.palette{width:min(580px,calc(100% - 32px));background:var(--bg);border:1px solid var(--hair);border-radius:18px;overflow:hidden}
+.palette input{width:100%;height:56px;border:0;border-bottom:1px solid var(--hair);background:transparent;padding:0 20px;font:400 17px var(--text)}
+.palette input:focus{outline:none}
+.palette ul{list-style:none;margin:0;padding:6px;max-height:52vh;overflow:auto}
+.palette li{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px}
+.palette li.on{background:var(--hair-2)}
+.palette li .k{margin-left:auto;font-size:12px;color:var(--ink-2)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,8px);background:var(--ink);color:var(--bg);border-radius:980px;padding:10px 18px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:40}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* mobile */
+.m-only{display:none!important}
+@media (max-width:900px){
+  /* side panels become fixed drawers here, so the grid holds only the center */
+  .app,.app.no-left,.app.no-right,.app.no-left.no-right{grid-template-columns:minmax(0,1fr)}
+  .center{grid-column:1}
+  .left,.right{position:fixed;top:0;bottom:0;width:min(340px,88vw);z-index:20;transition:transform .25s ease;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .left{left:0;transform:translateX(-102%)} .right{right:0;transform:translateX(102%)}
+  .app.m-left .left,.app.m-right .right{transform:none}
+  .m-only{display:inline-grid!important}
+  .doc{padding:24px 20px 80px}
+  .d-title{font-size:28px}
+  .g-legend{max-width:calc(100% - 28px);bottom:64px}
+}
+@media (prefers-reduced-motion:reduce){ .app,.left,.right,.preview,.toast{transition:none} }
+</style>
+<div class="app" id="app">
+
+  <aside class="left" aria-label="탐색">
+    <div class="l-head">
+      <div class="brand"><span class="mark" aria-hidden="true"></span><h1>재혁 Vault</h1><button class="icon m-only" data-close="left" aria-label="닫기">×</button></div>
+      <p class="l-sub" id="stats">불러오는 중</p>
+      <button class="btn sm quick" id="openPalette"><span>검색, 빠른 이동</span><kbd>⌘K</kbd></button>
+      <div class="seg" role="tablist" aria-label="탐색 보기" id="lSeg">
+        <button role="tab" data-tab="files" aria-selected="true">노트</button>
+        <button role="tab" data-tab="tasks" aria-selected="false">할 일</button>
+        <button role="tab" data-tab="lint" aria-selected="false">점검</button>
+        <button role="tab" data-tab="log" aria-selected="false">기록</button>
+      </div>
+    </div>
+    <div class="l-body" id="lBody"></div>
+  </aside>
+
+  <main class="center">
+    <div class="tabs" id="tabs" role="tablist" aria-label="열린 탭"></div>
+    <div class="views">
+      <section class="view graph-view" id="graphView" aria-label="그래프">
+        <canvas id="graph" aria-label="노트 연결 그래프. 노드를 누르면 오른쪽에 미리보기, 두 번 누르면 노트가 열려요."></canvas>
+        <p class="g-hint" id="gHint">누르면 미리보기, 두 번 누르면 열기</p>
+        <div class="g-tools">
+          <button class="icon" id="displayBtn" aria-label="그래프 설정" aria-expanded="false">⚙︎</button>
+        </div>
+        <div class="pop" id="displayPop" hidden>
+          <h3>필터</h3>
+          <label>소스 <input type="checkbox" id="optSources" checked></label>
+          <label>연결 없는 노트 <input type="checkbox" id="optOrphans" checked></label>
+          <label>이름 항상 보기 <input type="checkbox" id="optLabels"></label>
+          <h3 style="margin-top:10px">분류끼리 모이기</h3>
+          <input type="range" id="optCluster" min="0" max="1" step="0.05" value="0.55" aria-label="분류끼리 모이는 정도">
+          <h3 style="margin-top:10px">간격</h3>
+          <input type="range" id="optSpacing" min="0.6" max="1.8" step="0.05" value="1" aria-label="노드 간격">
+        </div>
+        <div class="g-legend" id="legend" aria-label="분류 켜고 끄기"></div>
+        <div class="g-zoom">
+          <button class="icon" id="zOut" aria-label="축소">−</button>
+          <button class="icon" id="zFit" aria-label="전체 보기">⤢</button>
+          <button class="icon" id="zIn" aria-label="확대">+</button>
+        </div>
+        <div class="preview" id="preview" aria-hidden="true"></div>
+        <div class="stage-empty" id="stageEmpty"><div><strong>불러오는 중</strong>잠시만요</div></div>
+      </section>
+      <section class="view note-view" id="noteView" hidden aria-label="노트"><article class="doc" id="doc"></article></section>
+    </div>
+  </main>
+
+  <aside class="right" aria-label="정보와 Claude">
+    <div class="r-head">
+      <div class="seg" role="tablist" id="rSeg" aria-label="오른쪽 보기">
+        <button role="tab" data-rtab="info" aria-selected="true">정보</button>
+        <button role="tab" data-rtab="claude" aria-selected="false" id="rTabClaude" hidden>Claude</button>
+      </div>
+      <button class="icon m-only" data-close="right" aria-label="닫기">×</button>
+    </div>
+    <div class="r-body" id="rInfo"></div>
+    <div class="c-wrap" id="rClaude" hidden>
+      <div class="r-body" id="cBody">
+        <div class="seg c-modes" role="tablist" id="cModes" aria-label="Claude 작업">
+          <button role="tab" data-mode="ask" aria-selected="true">질문</button>
+          <button role="tab" data-mode="ingest" aria-selected="false">소스 넣기</button>
+          <button role="tab" data-mode="lint" aria-selected="false">내용 점검</button>
+        </div>
+        <div class="c-log" id="cLog" aria-live="polite"></div>
+      </div>
+      <div class="composer" id="composer"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="palette" role="dialog" aria-label="검색, 빠른 이동">
+    <label class="sr-only" for="pInput">노트, 본문, 명령 찾기</label>
+    <input id="pInput" placeholder="노트, 본문, 명령 찾기" autocomplete="off">
+    <ul id="pList" role="listbox"></ul>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+"use strict";
+
+// ============ constants ============
+const GROUPS = [
+  {id:"subject",   label:"교과"},
+  {id:"activity",  label:"창체"},
+  {id:"reading",   label:"독서"},
+  {id:"award",     label:"수상"},
+  {id:"career",    label:"진로"},
+  {id:"admission", label:"대입"},
+  {id:"daily",     label:"일상"},
+  {id:"etc",       label:"기타"},
+];
+const FOLDER_TO_GROUP = Object.fromEntries(GROUPS.map(g => [g.label, g.id]));
+const GIDS = GROUPS.map(g => g.id);
+const STATUSES = ["진행중", "예정", "확인 필요", "완료", "보관"];
+const LS_NOTES = "jh-vault-notes-v1", LS_LOG = "jh-vault-log-v1";
+const DAY = 86400000;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ============ state ============
+const notes = new Map();
+let logEntries = [];
+let nodes = [], links = [], nodeById = new Map();
+const hiddenGroups = new Set();
+const opt = {sources:true, orphans:true, labels:false, spacing:1, cluster:.55};
+let selectedId = null, hoverId = null;
+let tabs = ["graph"], active = "graph";
+let editing = false;
+let mode = "loading", readOnly = false, db = null;
+let leftTab = "files", rightTab = "info", fileFilter = "", tagFilter = "";
+const collapsed = new Set();
+const editedAt = {}, saveTimers = {}, saveChains = {}, lastEditLog = {};
+let pending = 0;
+
+// ============ utils ============
+const $ = id => document.getElementById(id);
+const norm = s => (s || "").trim().toLowerCase();
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const H = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const gOf = n => n && GIDS.includes(n.group) ? n.group : "etc";
+const gLabel = id => (GROUPS.find(g => g.id === id) || GROUPS[GROUPS.length - 1]).label;
+const isSource = n => !!n && n.type === "source";
+const LINK_RE = /\[\[([^\]|#\n]+)(?:[|#][^\]\n]*)?\]\]/g;
+function parseLinks(body){ const out = []; let m; LINK_RE.lastIndex = 0; while ((m = LINK_RE.exec(body || ""))) { const t = m[1].trim(); if (t) out.push(t); } return out; }
+function parseTags(body){ const s = new Set(); const re = /(^|[\s(])#([0-9A-Za-z가-힣_\-/]+)/g; let m; const b = (body || "").replace(/^#{1,6}\s.*$/gm, ""); while ((m = re.exec(b))) s.add(m[2]); return [...s]; }
+function parseTasks(body){ const out = []; (body || "").split("\n").forEach((ln, i) => { const m = ln.match(/^\s*[-*]\s\[( |x|X)\]\s+(.*)$/); if (m) out.push({line:i, done:m[1] !== " ", text:m[2]}); }); return out; }
+function plain(body){ return (body || "").replace(/\[\[([^\]|#\n]+)(?:[|#][^\]\n]*)?\]\]/g, "$1").replace(/[#*>`]/g, "").replace(/^\s*[-*]\s\[[ xX]\]\s*/gm, "").replace(/\s+/g, " ").trim(); }
+function titleIdx(){ const m = new Map(); notes.forEach(n => m.set(norm(n.title), n.id)); return m; }
+function byTitle(t){ const id = titleIdx().get(norm(t)); return id ? notes.get(id) : null; }
+function rel(ts){
+  if (!ts) return ""; const d = Date.now() - ts;
+  if (d < 60000) return "방금"; if (d < 3600000) return Math.floor(d / 60000) + "분 전";
+  if (d < DAY) return Math.floor(d / 3600000) + "시간 전"; if (d < 30 * DAY) return Math.floor(d / DAY) + "일 전";
+  const t = new Date(ts); return `${t.getFullYear()}.${t.getMonth() + 1}.${t.getDate()}`;
+}
+let toastT;
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2400); }
+function dotFor(n){ const g = gOf(n); return `<span class="dot${isSource(n) ? " ring" : ""}" style="background:var(--g-${g});color:var(--g-${g})"></span>`; }
+const ghostDot = `<span class="dot ring" style="color:var(--ink-2)"></span>`;
+const mobile = () => innerWidth <= 900;
+
+// ============ theme ============
+let C = {};
+function readTheme(){
+  const s = getComputedStyle(document.documentElement), v = k => s.getPropertyValue(k).trim();
+  C = {canvas:v("--canvas"), bg:v("--bg"), ink:v("--ink"), ink2:v("--ink-2"), edge:v("--edge"), fill:v("--fill"), link:v("--link")};
+  GIDS.forEach(g => C[g] = v("--g-" + g));
+  C.font = getComputedStyle(document.body).fontFamily;
+}
+readTheme();
+const onTheme = () => { readTheme(); drawLocal(); };
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme);
+new MutationObserver(onTheme).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+function rgba(hex, a){
+  const m = hex.replace("#", ""); if (m.length !== 6) return hex;
+  return `rgba(${parseInt(m.slice(0, 2), 16)},${parseInt(m.slice(2, 4), 16)},${parseInt(m.slice(4, 6), 16)},${a})`;
+}
+
+// ============ graph model ============
+// deterministic layout seed, so the map looks the same every time you open it
+function hrand(s, k){ let x = 2166136261 ^ k; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } x ^= x >>> 13; x = Math.imul(x, 0x5bd1e995); x ^= x >>> 15; return (x >>> 0) / 4294967296; }
+function rebuild(){
+  const idx = titleIdx(), prev = nodeById, next = new Map(), keys = new Set(), L = [], ghosts = new Map();
+  notes.forEach(n => {
+    if (hiddenGroups.has(gOf(n)) || (!opt.sources && isSource(n))) return;
+    next.set(n.id, {id:n.id, title:n.title || "제목 없음", group:gOf(n), source:isSource(n), ghost:false});
+  });
+  notes.forEach(n => {
+    if (!next.has(n.id)) return;
+    parseLinks(n.body).forEach(t => {
+      let tid = idx.get(norm(t));
+      if (!tid) { tid = "ghost:" + norm(t); if (!ghosts.has(tid)) ghosts.set(tid, {id:tid, title:t, group:"etc", ghost:true}); }
+      else if (!next.has(tid)) return;
+      if (tid === n.id) return;
+      const k = n.id < tid ? n.id + "|" + tid : tid + "|" + n.id;
+      if (keys.has(k)) return; keys.add(k); L.push({s:n.id, t:tid});
+    });
+  });
+  ghosts.forEach((g, id) => next.set(id, g));
+  next.forEach(nd => { const p = prev.get(nd.id); if (p) { nd.x = p.x; nd.y = p.y; nd.vx = p.vx; nd.vy = p.vy; nd.a = p.a; nd.la = p.la; nd.rr = p.rr; } nd.deg = 0; });
+  L.forEach(l => { next.get(l.s).deg++; next.get(l.t).deg++; });
+  if (!opt.orphans) [...next.keys()].forEach(id => { if (next.get(id).deg === 0) next.delete(id); });
+  [...next.values()].sort((p, q) => p.id < q.id ? -1 : 1).forEach(nd => {
+    if (nd.x !== undefined) return;
+    const l = L.find(l => (l.s === nd.id && next.get(l.t)?.x !== undefined) || (l.t === nd.id && next.get(l.s)?.x !== undefined));
+    const an = l ? next.get(l.s === nd.id ? l.t : l.s) : null;
+    const gi = GIDS.indexOf(nd.group), ga = gi / GIDS.length * Math.PI * 2;
+    const a = hrand(nd.id, 1) * Math.PI * 2, d = an ? 30 : 40 + hrand(nd.id, 2) * 60;
+    nd.x = (an ? an.x : Math.cos(ga) * 180) + Math.cos(a) * d; nd.y = (an ? an.y : Math.sin(ga) * 180) + Math.sin(a) * d;
+    nd.vx = nd.vy = 0; nd.a = 0; nd.la = 0;
+  });
+  next.forEach(nd => { nd.r = nd.ghost ? 2.8 : 3.8 + Math.sqrt(nd.deg) * 2.7; if (nd.rr === undefined) nd.rr = nd.r; });
+  nodeById = next; nodes = [...next.values()];
+  links = L.filter(l => next.has(l.s) && next.has(l.t)).map(l => ({...l, sn:next.get(l.s), tn:next.get(l.t)}));
+  alpha = Math.max(alpha, .3);
+  updateStats();
+}
+function updateStats(){
+  let pages = 0, srcs = 0; notes.forEach(n => isSource(n) ? srcs++ : pages++);
+  const open = [...notes.values()].reduce((a, n) => a + parseTasks(n.body).filter(t => !t.done).length, 0);
+  $("stats").textContent = `노트 ${pages} · 소스 ${srcs} · 할 일 ${open}` + (mode === "local" ? " · 이 기기에만 저장" : readOnly ? " · 보기 전용" : "");
+  const se = $("stageEmpty");
+  if (mode === "loading") { se.hidden = false; return; }
+  if (notes.size) { se.hidden = true; return; }
+  se.hidden = false;
+  se.innerHTML = readOnly ? "<div><strong>아직 비어 있어요</strong>편집 권한이 있는 사람이 노트를 추가하면 보여요.</div>" : "<div><strong>아직 비어 있어요</strong>N을 눌러 첫 노트를 만들어 보세요.</div>";
+}
+
+// ============ simulation ============
+let alpha = 1, alphaTarget = 0;
+function tick(){
+  if (alpha < .002 && alphaTarget === 0) return;
+  alpha += (alphaTarget - alpha) * .02;
+  const n = nodes.length, sp = opt.spacing;
+  for (let i = 0; i < n; i++) { const a = nodes[i];
+    for (let j = i + 1; j < n; j++) { const b = nodes[j];
+      let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+      if (d2 < 1) { dx = hrand(a.id + b.id, 3) - .5; dy = hrand(a.id + b.id, 4) - .5; d2 = 1; }
+      if (d2 > 360000 * sp) continue;
+      const f = -300 * sp * alpha / d2;
+      a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f;
+    }
+  }
+  for (const l of links) { const a = l.sn, b = l.tn;
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+    const same = a.group === b.group;
+    const target = (same ? 44 : 70) * sp + (a.r + b.r) * 2;
+    // degree-weighted springs: a hub with many links moves less than its leaves, so hubs don't overshoot
+    const k = (d - target) / d * alpha * .5 / Math.max(1, Math.min(a.deg, b.deg));
+    const bias = a.deg / Math.max(1, a.deg + b.deg);
+    a.vx += dx * k * (1 - bias); a.vy += dy * k * (1 - bias); b.vx -= dx * k * bias; b.vy -= dy * k * bias;
+  }
+  if (opt.cluster > 0) {
+    const cen = {};
+    for (const a of nodes) { if (a.ghost) continue; const c = cen[a.group] || (cen[a.group] = {x:0, y:0, n:0}); c.x += a.x; c.y += a.y; c.n++; }
+    const s = opt.cluster * .035 * alpha;
+    for (const a of nodes) { const c = cen[a.group]; if (!c || a.ghost) continue; a.vx += (c.x / c.n - a.x) * s; a.vy += (c.y / c.n - a.y) * s; }
+  }
+  for (const a of nodes) {
+    a.vx -= a.x * .01 * alpha; a.vy -= a.y * .01 * alpha;
+    if (a === dragNode) { a.vx = a.vy = 0; continue; }
+    a.vx *= .6; a.vy *= .6; a.x += a.vx; a.y += a.vy;
+  }
+}
+
+// ============ canvas & camera ============
+const gv = $("graphView"), cv = $("graph"), ctx = cv.getContext("2d");
+let W = 0, Hh = 0, dpr = 1;
+const cam = {x:0, y:0, k:1}, camT = {x:0, y:0, k:1};
+function resize(){ const r = gv.getBoundingClientRect(); dpr = Math.min(devicePixelRatio || 1, 2); W = r.width; Hh = r.height; cv.width = Math.max(1, W * dpr); cv.height = Math.max(1, Hh * dpr); }
+new ResizeObserver(resize).observe(gv); resize();
+const toWorld = (sx, sy) => ({x:(sx - W / 2 - cam.x) / cam.k, y:(sy - Hh / 2 - cam.y) / cam.k});
+const toScreen = (x, y) => ({x:W / 2 + cam.x + x * cam.k, y:Hh / 2 + cam.y + y * cam.k});
+function fit(anim = true){
+  if (!nodes.length || !W) return;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  nodes.forEach(n => { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y); x1 = Math.max(x1, n.x); y1 = Math.max(y1, n.y); });
+  const k = clamp(Math.min((W - 140) / Math.max(1, x1 - x0), (Hh - 160) / Math.max(1, y1 - y0)), .25, 1.8);
+  camT.k = k; camT.x = -((x0 + x1) / 2) * k; camT.y = -((y0 + y1) / 2) * k;
+  if (!anim) Object.assign(cam, camT);
+}
+function centerOn(n, k){ camT.k = k || Math.max(cam.k, 1.2); camT.x = -n.x * camT.k; camT.y = -n.y * camT.k; }
+function zoomAt(f, sx, sy){ const w = toWorld(sx, sy), k = clamp(camT.k * f, .2, 5); camT.k = k; camT.x = sx - W / 2 - w.x * k; camT.y = sy - Hh / 2 - w.y * k; }
+function neighbours(id){ const s = new Set([id]); links.forEach(l => { if (l.s === id) s.add(l.t); else if (l.t === id) s.add(l.s); }); return s; }
+
+function draw(now){
+  requestAnimationFrame(draw);
+  if (active !== "graph" || !W) return;
+  tick();
+  cam.x += (camT.x - cam.x) * .16; cam.y += (camT.y - cam.y) * .16; cam.k += (camT.k - cam.k) * .16;
+  const focus = hoverId || selectedId;
+  const nb = focus && nodeById.has(focus) ? neighbours(focus) : null;
+  let tagSet = null;
+  if (tagFilter) { tagSet = new Set(); notes.forEach(n => { if (parseTags(n.body).some(t => norm(t) === norm(tagFilter))) tagSet.add(n.id); }); }
+  for (const n of nodes) {
+    let t = 1;
+    if (tagSet) t = tagSet.has(n.id) ? 1 : .1; else if (nb) t = nb.has(n.id) ? 1 : .1;
+    n.a += (t - n.a) * .14;
+    const tr = n.r * (n.id === focus ? 1.45 : 1);
+    n.rr += (tr - n.rr) * .2;
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = C.canvas; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(dpr * cam.k, 0, 0, dpr * cam.k, dpr * (W / 2 + cam.x), dpr * (Hh / 2 + cam.y));
+  ctx.lineCap = "round";
+  const fNode = focus ? nodeById.get(focus) : null, fCol = fNode ? (fNode.ghost ? C.ink2 : C[fNode.group]) : C.link;
+  // edges
+  for (const l of links) {
+    const hi = nb && (l.s === focus || l.t === focus);
+    const a = hi ? .9 : Math.max(.05, Math.min(l.sn.a, l.tn.a) * (nb ? .5 : 1));
+    ctx.globalAlpha = a; ctx.strokeStyle = hi ? fCol : C.edge; ctx.lineWidth = (hi ? 1.6 : 1) / cam.k;
+    ctx.beginPath(); ctx.moveTo(l.sn.x, l.sn.y); ctx.lineTo(l.tn.x, l.tn.y); ctx.stroke();
+  }
+  // pulses along focused edges
+  if (nb && fNode && !reduceMotion) {
+    const t0 = (now || 0) / 1400; ctx.fillStyle = fCol;
+    links.forEach((l, i) => {
+      if (l.s !== focus && l.t !== focus) return;
+      const other = l.s === focus ? l.tn : l.sn, p = (t0 + i * .137) % 1;
+      const x = fNode.x + (other.x - fNode.x) * p, y = fNode.y + (other.y - fNode.y) * p;
+      ctx.globalAlpha = Math.sin(p * Math.PI) * .9;
+      ctx.beginPath(); ctx.arc(x, y, 1.8 / Math.sqrt(cam.k) + .4, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  // nodes
+  for (const n of nodes) {
+    const col = n.ghost ? C.ink2 : C[n.group];
+    const isF = n.id === focus, isSel = n.id === selectedId;
+    ctx.globalAlpha = Math.max(.08, n.a);
+    if (isF && !n.ghost) {
+      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.rr * 4.5);
+      g.addColorStop(0, rgba(col, .35)); g.addColorStop(1, rgba(col, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(n.x, n.y, n.rr * 4.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.beginPath(); ctx.arc(n.x, n.y, n.rr, 0, Math.PI * 2);
+    if (n.ghost) { ctx.setLineDash([1.6 / cam.k * 1.5, 1.6 / cam.k * 1.5]); ctx.strokeStyle = col; ctx.lineWidth = 1.1 / cam.k; ctx.stroke(); ctx.setLineDash([]); }
+    else if (n.source) { ctx.fillStyle = C.canvas; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = Math.max(1.4 / cam.k, n.rr * .38); ctx.stroke(); }
+    else { ctx.fillStyle = col; ctx.fill(); }
+    if (isSel) { ctx.beginPath(); ctx.arc(n.x, n.y, n.rr + 3.5 + 1.5 / cam.k, 0, Math.PI * 2); ctx.strokeStyle = col; ctx.globalAlpha = .6; ctx.lineWidth = 1.2 / cam.k; ctx.stroke(); }
+  }
+  // labels (with collision avoidance, like Obsidian)
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  const base = opt.labels ? 1 : clamp((cam.k - .85) / .35, 0, 1), hub = opt.labels ? 1 : clamp((cam.k - .35) / .3, 0, 1);
+  const cand = [];
+  for (const n of nodes) {
+    let la = n.deg >= 6 ? Math.max(base, hub) : base, forced = false;
+    if (nb && nb.has(n.id)) { la = 1; forced = true; }
+    if (tagSet && tagSet.has(n.id)) { la = 1; forced = true; }
+    la *= n.a;
+    const p = toScreen(n.x, n.y), isF = n.id === focus;
+    cand.push({n, la, forced, isF, p, pri:(isF ? 1e6 : 0) + (forced ? 1e4 : 0) + n.deg * 10 + (n.source ? 0 : 1)});
+  }
+  cand.sort((a, b) => b.pri - a.pri);
+  const placed = [];
+  for (const c of cand) {
+    if (c.la > .05) {
+      const fs = c.isF ? 14 : 12;
+      const w = (c.n._tw && c.n._tf === fs ? c.n._tw : (ctx.font = `${c.isF ? 600 : 400} ${fs}px ${C.font}`, c.n._tf = fs, c.n._tw = ctx.measureText(c.n.title).width));
+      const r = {x0:c.p.x - w / 2 - 3, x1:c.p.x + w / 2 + 3, y0:c.p.y + c.n.rr * cam.k + 3, y1:c.p.y + c.n.rr * cam.k + 5 + fs + 3};
+      const hitR = placed.some(q => r.x0 < q.x1 && r.x1 > q.x0 && r.y0 < q.y1 && r.y1 > q.y0);
+      if (hitR && !c.isF && !(c.forced && placed.length < 3)) c.la = 0; else placed.push(r);
+    }
+    c.n.la += (c.la - c.n.la) * .2;
+  }
+  for (const c of cand) {
+    const n = c.n; if (n.la < .03) continue;
+    const p = c.p;
+    if (p.x < -140 || p.x > W + 140 || p.y < -40 || p.y > Hh + 40) continue;
+    ctx.font = `${c.isF ? 600 : 400} ${c.isF ? 14 : 12}px ${C.font}`;
+    const ty = p.y + n.rr * cam.k + 5;
+    ctx.globalAlpha = n.la; ctx.lineWidth = 4; ctx.strokeStyle = C.canvas; ctx.lineJoin = "round";
+    ctx.strokeText(n.title, p.x, ty);
+    ctx.fillStyle = c.isF || (nb && nb.has(n.id)) ? C.ink : C.ink2;
+    ctx.fillText(n.title, p.x, ty);
+  }
+  ctx.globalAlpha = 1;
+}
+
+// ============ pointer ============
+const ptrs = new Map();
+let userMoved = false;
+let dragNode = null, panning = false, downPos = null, downNode = null, moved = 0, pinch = null;
+const localPt = e => { const r = gv.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top}; };
+function hit(sx, sy){ const w = toWorld(sx, sy); let best = null, bd = Infinity; for (const n of nodes) { const d = Math.hypot(n.x - w.x, n.y - w.y); if (d < n.rr + 7 / cam.k && d < bd) { bd = d; best = n; } } return best; }
+cv.addEventListener("pointerdown", e => {
+  cv.setPointerCapture(e.pointerId); const p = localPt(e); ptrs.set(e.pointerId, p); hidePreview(); $("displayPop").hidden = true;
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch = {d:Math.hypot(a.x - b.x, a.y - b.y), k:camT.k, mid:{x:(a.x + b.x) / 2, y:(a.y + b.y) / 2}}; pinch.w = toWorld(pinch.mid.x, pinch.mid.y); dragNode = null; panning = false; moved = 99; return; }
+  downPos = p; moved = 0; downNode = hit(p.x, p.y);
+  if (downNode) { dragNode = downNode; alphaTarget = .2; alpha = Math.max(alpha, .2); } else panning = true;
+  cv.classList.add("drag");
+});
+cv.addEventListener("pointermove", e => {
+  const p = localPt(e); if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, p);
+  if (pinch && ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y), mid = {x:(a.x + b.x) / 2, y:(a.y + b.y) / 2}; const k = clamp(pinch.k * d / pinch.d, .2, 5); camT.k = cam.k = k; camT.x = cam.x = mid.x - W / 2 - pinch.w.x * k; camT.y = cam.y = mid.y - Hh / 2 - pinch.w.y * k; return; }
+  if (downPos) {
+    moved = Math.max(moved, Math.hypot(p.x - downPos.x, p.y - downPos.y));
+    if (dragNode && moved > 3) { const w = toWorld(p.x, p.y); dragNode.x = w.x; dragNode.y = w.y; }
+    else if (panning) { userMoved = true; camT.x += e.movementX; camT.y += e.movementY; cam.x = camT.x; cam.y = camT.y; }
+    return;
+  }
+  if (e.pointerType === "mouse") {
+    const h = hit(p.x, p.y), id = h ? h.id : null;
+    if (id !== hoverId) { hoverId = id; hidePreview(); if (h) schedulePreview(h, p); } else if (h) movePreview(p);
+    cv.classList.toggle("on-node", !!h);
+  }
+});
+let lastTap = {id:null, t:0};
+function endPtr(e){
+  ptrs.delete(e.pointerId);
+  if (pinch) { if (ptrs.size < 2) pinch = null; if (!ptrs.size) { downPos = null; cv.classList.remove("drag"); } return; }
+  if (!downPos) return;
+  if (moved <= 4 && e.type === "pointerup") {
+    if (downNode) {
+      const now = performance.now();
+      if (lastTap.id === downNode.id && now - lastTap.t < 380) { openNote(downNode.id); lastTap = {id:null, t:0}; }
+      else { select(downNode.id); lastTap = {id:downNode.id, t:now}; }
+    } else { select(null); if (tagFilter) { tagFilter = ""; renderLeft(); } }
+  }
+  dragNode = null; panning = false; downPos = null; downNode = null; alphaTarget = 0; cv.classList.remove("drag");
+}
+cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
+cv.addEventListener("pointerleave", e => { if (e.pointerType === "mouse" && !downPos) { hoverId = null; hidePreview(); cv.classList.remove("on-node"); } });
+cv.addEventListener("wheel", e => { e.preventDefault(); userMoved = true; const p = localPt(e); zoomAt(Math.exp(-e.deltaY * .0016), p.x, p.y); }, {passive:false});
+$("zIn").onclick = () => zoomAt(1.3, W / 2, Hh / 2);
+$("zOut").onclick = () => zoomAt(1 / 1.3, W / 2, Hh / 2);
+$("zFit").onclick = () => fit();
+
+let pvT = null; const pv = $("preview");
+function schedulePreview(nd, p){ clearTimeout(pvT); pvT = setTimeout(() => showPreview(nd, p), 280); }
+function showPreview(nd, p){
+  const n = notes.get(nd.id);
+  const meta = nd.ghost ? "아직 없는 노트" : `${isSource(n) ? "소스" : gLabel(gOf(n))} · ${n.status || "진행중"} · 연결 ${nd.deg}`;
+  const body = nd.ghost ? "링크만 걸려 있어요. 두 번 누르면 만들 수 있어요." : (plain(n.body).slice(0, 200) || "내용 없음");
+  pv.innerHTML = `<p class="pt">${n ? dotFor(n) : ghostDot}${H(nd.title)}</p><p class="pm">${H(meta)}</p><p class="pb">${H(body)}</p>`;
+  movePreview(p); pv.classList.add("show");
+}
+function movePreview(p){ pv.style.left = clamp(p.x + 16, 8, W - 270) + "px"; pv.style.top = clamp(p.y + 16, 8, Hh - 150) + "px"; }
+function hidePreview(){ clearTimeout(pvT); pv.classList.remove("show"); }
+
+$("displayBtn").onclick = e => { const p = $("displayPop"); p.hidden = !p.hidden; e.currentTarget.setAttribute("aria-expanded", String(!p.hidden)); };
+$("optSources").onchange = e => { opt.sources = e.target.checked; rebuild(); };
+$("optOrphans").onchange = e => { opt.orphans = e.target.checked; rebuild(); };
+$("optLabels").onchange = e => { opt.labels = e.target.checked; };
+$("optSpacing").oninput = e => { opt.spacing = +e.target.value; alpha = Math.max(alpha, .5); };
+$("optCluster").oninput = e => { opt.cluster = +e.target.value; alpha = Math.max(alpha, .5); };
+function renderLegend(){
+  const el = $("legend"); el.innerHTML = "";
+  GROUPS.forEach(g => {
+    const c = [...notes.values()].filter(n => gOf(n) === g.id).length; if (!c) return;
+    const b = document.createElement("button"); b.setAttribute("aria-pressed", String(!hiddenGroups.has(g.id)));
+    b.innerHTML = `<span class="dot" style="background:var(--g-${g.id})"></span>${g.label}`;
+    b.onclick = () => { hiddenGroups.has(g.id) ? hiddenGroups.delete(g.id) : hiddenGroups.add(g.id); renderLegend(); rebuild(); };
+    el.appendChild(b);
+  });
+}
+
+// ============ tabs ============
+function renderTabs(){
+  const el = $("tabs"); el.innerHTML = "";
+  const lt = document.createElement("button"); lt.className = "icon"; lt.textContent = "☰"; lt.setAttribute("aria-label", "노트 목록 열고 닫기");
+  lt.onclick = () => mobile() ? (app.classList.toggle("m-left"), app.classList.remove("m-right")) : app.classList.toggle("no-left");
+  el.appendChild(lt);
+  tabs.forEach(id => {
+    const b = document.createElement("button"); b.setAttribute("role", "tab"); b.setAttribute("aria-selected", String(id === active));
+    b.className = "tab" + (id === active ? " on" : "") + (id === "graph" ? " graph" : "");
+    if (id === "graph") b.innerHTML = `<span aria-hidden="true">◎</span><span class="t">그래프</span>`;
+    else {
+      const n = notes.get(id);
+      b.innerHTML = (n ? dotFor(n) : ghostDot) + `<span class="t"></span><span class="x" role="button" aria-label="탭 닫기">×</span>`;
+      b.querySelector(".t").textContent = n ? n.title : "없는 노트";
+      b.querySelector(".x").onclick = ev => { ev.stopPropagation(); closeTab(id); };
+      b.onauxclick = ev => { if (ev.button === 1) closeTab(id); };
+    }
+    b.onclick = () => activate(id);
+    el.appendChild(b);
+  });
+  el.insertAdjacentHTML("beforeend", `<span class="spacer"></span>`);
+  if (!readOnly) { const nb = document.createElement("button"); nb.className = "btn xs plain"; nb.textContent = "새 노트"; nb.onclick = () => createNote(); el.appendChild(nb); }
+  const rt = document.createElement("button"); rt.className = "icon"; rt.textContent = "◧"; rt.setAttribute("aria-label", "오른쪽 패널 열고 닫기");
+  rt.onclick = () => mobile() ? (app.classList.toggle("m-right"), app.classList.remove("m-left")) : app.classList.toggle("no-right");
+  el.appendChild(rt);
+  el.querySelector(".tab.on")?.scrollIntoView({block:"nearest", inline:"nearest"});
+}
+function activate(id){
+  if (!tabs.includes(id)) tabs.push(id);
+  active = id;
+  if (id === "graph") { $("graphView").hidden = false; $("noteView").hidden = true; editing = false; }
+  else { selectedId = id; $("graphView").hidden = true; $("noteView").hidden = false; renderDoc(); $("noteView").scrollTop = 0; }
+  renderTabs(); renderRight(); renderLeftIfFiles();
+}
+function closeTab(id){
+  const i = tabs.indexOf(id); if (i < 0 || id === "graph") return;
+  tabs.splice(i, 1);
+  if (active === id) activate(tabs[Math.min(i, tabs.length - 1)] || "graph"); else renderTabs();
+}
+function openNote(id){
+  if (!notes.has(id)) { const nd = nodeById.get(id); if (nd && nd.ghost && !readOnly) { createNote(nd.title); return; } if (!nd) return; }
+  if (active !== id) editing = false;
+  if (!tabs.includes(id)) { tabs.push(id); if (tabs.length > 9) { const drop = tabs.find(t => t !== "graph" && t !== active && t !== id); tabs.splice(tabs.indexOf(drop), 1); } }
+  activate(id);
+  if (mobile()) app.classList.remove("m-left");
+}
+function select(id){ selectedId = id; if (id && !mobile()) app.classList.remove("no-right"); renderRight(); renderLeftIfFiles(); }
+
+// ============ left ============
+const app = $("app");
+document.querySelectorAll("[data-close]").forEach(b => b.onclick = () => app.classList.remove(b.dataset.close === "left" ? "m-left" : "m-right"));
+document.querySelectorAll("#lSeg button").forEach(b => b.onclick = () => pickTab(b.dataset.tab));
+function pickTab(t){ leftTab = t; document.querySelectorAll("#lSeg button").forEach(x => x.setAttribute("aria-selected", String(x.dataset.tab === t))); renderLeft(); if (mobile()) app.classList.add("m-left"); else app.classList.remove("no-left"); }
+function renderLeftIfFiles(){ if (leftTab === "files") renderLeft(); }
+function renderLeft(){
+  const el = $("lBody"); el.innerHTML = "";
+  if (leftTab === "files") renderFiles(el); else if (leftTab === "tasks") renderTasks(el); else if (leftTab === "lint") renderLint(el); else renderLog(el);
+}
+function fileBtn(n, meta){
+  const b = document.createElement("button"); b.className = "file" + (n.id === (active !== "graph" ? active : selectedId) ? " on" : "");
+  b.innerHTML = `${dotFor(n)}<span class="t"></span>${meta ? `<span class="m"></span>` : ""}`;
+  b.querySelector(".t").textContent = n.title; if (meta) b.querySelector(".m").textContent = meta;
+  b.onclick = () => openNote(n.id);
+  return b;
+}
+function renderFiles(el){
+  const f = document.createElement("input"); f.className = "filter"; f.placeholder = "노트 걸러 보기"; f.value = fileFilter; f.setAttribute("aria-label", "노트 걸러 보기");
+  f.oninput = () => { fileFilter = f.value; const pos = f.selectionStart; renderLeft(); const nf = $("lBody").querySelector(".filter"); nf.focus(); nf.setSelectionRange(pos, pos); };
+  el.appendChild(f);
+  const q = norm(fileFilter), match = n => !q || norm(n.title).includes(q) || norm(n.body).includes(q);
+  const sorted = [...notes.values()].sort((a, b) => a.title.localeCompare(b.title, "ko"));
+  const folder = (key, label, color, list, metaFn) => {
+    if (!list.length) return;
+    const d = document.createElement("div"); d.className = "folder" + (collapsed.has(key) && !q ? " closed" : "");
+    const h = document.createElement("button"); h.setAttribute("aria-expanded", String(!d.classList.contains("closed")));
+    h.innerHTML = `<span class="chev">▾</span><span class="dot" style="background:${color}"></span>${label}<span class="n">${list.length}</span>`;
+    h.onclick = () => { collapsed.has(key) ? collapsed.delete(key) : collapsed.add(key); renderLeft(); };
+    const files = document.createElement("div"); files.className = "files";
+    list.forEach(n => files.appendChild(fileBtn(n, metaFn(n))));
+    d.append(h, files); el.appendChild(d);
+  };
+  GROUPS.forEach(g => folder(g.id, g.label, `var(--g-${g.id})`, sorted.filter(n => !isSource(n) && gOf(n) === g.id && match(n)), n => n.status && n.status !== "진행중" ? n.status : ""));
+  folder("__src", "소스 (원본)", "transparent;box-shadow:inset 0 0 0 1.5px var(--ink-2)", sorted.filter(n => isSource(n) && match(n)), () => "");
+  if (!sorted.some(match)) el.insertAdjacentHTML("beforeend", `<p class="empty">${q ? "맞는 노트가 없어요" : "아직 노트가 없어요"}</p>`);
+  const tagCount = new Map(); notes.forEach(n => parseTags(n.body).forEach(t => tagCount.set(t, (tagCount.get(t) || 0) + 1)));
+  if (tagCount.size) {
+    el.insertAdjacentHTML("beforeend", `<p class="sub-h"><span>태그</span>${tagFilter ? `<button class="link" style="font-size:12px" id="tagClear">해제</button>` : ""}</p>`);
+    const tc = document.createElement("div"); tc.className = "tagcloud";
+    [...tagCount.entries()].sort((a, b) => b[1] - a[1]).forEach(([t, c]) => {
+      const b = document.createElement("button"); b.textContent = `#${t} ${c}`; if (norm(t) === norm(tagFilter)) b.className = "on";
+      b.onclick = () => { tagFilter = norm(t) === norm(tagFilter) ? "" : t; activate("graph"); renderLeft(); };
+      tc.appendChild(b);
+    });
+    el.appendChild(tc);
+    $("tagClear")?.addEventListener("click", () => { tagFilter = ""; renderLeft(); });
+  }
+}
+function renderTasks(el){
+  let open = 0, done = 0; const frag = document.createDocumentFragment();
+  [...notes.values()].sort((a, b) => a.title.localeCompare(b.title, "ko")).forEach(n => {
+    const ts = parseTasks(n.body); const o = ts.filter(t => !t.done); done += ts.length - o.length; if (!o.length) return; open += o.length;
+    const h = document.createElement("p"); h.className = "sub-h"; const lb = document.createElement("button"); lb.className = "link"; lb.style.fontSize = "12px"; lb.textContent = n.title; lb.onclick = () => openNote(n.id); h.appendChild(lb); frag.appendChild(h);
+    o.forEach(t => {
+      const d = document.createElement("label"); d.className = "task";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.disabled = readOnly || isSource(n); cb.onchange = () => toggleTask(n.id, t.line);
+      const s = document.createElement("span"); s.textContent = t.text.replace(/\[\[([^\]|#\n]+)(?:[|#][^\]\n]*)?\]\]/g, "$1");
+      d.append(cb, s); frag.appendChild(d);
+    });
+  });
+  el.insertAdjacentHTML("beforeend", `<p class="empty">남은 ${open}개, 끝낸 ${done}개. 노트에 <code>- [ ] 할 일</code>로 적으면 여기 모여요.</p>`);
+  el.appendChild(frag);
+}
+function toggleTask(id, line){
+  const n = notes.get(id); if (!n || readOnly || isSource(n)) return;
+  const ls = n.body.split("\n"), ln = ls[line]; if (ln === undefined) return;
+  ls[line] = /\[ \]/.test(ln) ? ln.replace("[ ]", "[x]") : ln.replace(/\[[xX]\]/, "[ ]");
+  n.body = ls.join("\n"); touch(id); queueSave(id, 300);
+  if (/\[x\]/.test(ls[line])) addLog("할 일 완료", n.title, plain(ls[line]).slice(0, 60));
+  refreshAll(); if (active === id && !editing) renderDoc(); renderRight();
+}
+function lintData(){
+  const idx = titleIdx(), ghosts = new Map(), inbound = new Map();
+  notes.forEach(n => parseLinks(n.body).forEach(t => {
+    const id = idx.get(norm(t));
+    if (!id) { const k = norm(t); if (!ghosts.has(k)) ghosts.set(k, {title:t, from:new Set()}); ghosts.get(k).from.add(n.title); }
+    else if (id !== n.id) { if (!inbound.has(id)) inbound.set(id, new Set()); inbound.get(id).add(n.id); }
+  }));
+  const deg = id => (inbound.get(id)?.size || 0) + parseLinks(notes.get(id).body).filter(t => idx.get(norm(t)) && idx.get(norm(t)) !== id).length;
+  return {
+    ghosts:[...ghosts.values()],
+    orphans:[...notes.values()].filter(n => deg(n.id) === 0),
+    uncitedSrc:[...notes.values()].filter(n => isSource(n) && ![...(inbound.get(n.id) || [])].some(x => !isSource(notes.get(x)))),
+    check:[...notes.values()].filter(n => n.status === "확인 필요" || /확인\s?필요/.test(n.body || "")).map(n => ({n, c:(n.body.match(/확인\s?필요/g) || []).length})),
+    stale:[...notes.values()].filter(n => !isSource(n) && (n.status || "진행중") === "진행중" && n.updated && Date.now() - n.updated > 21 * DAY),
+  };
+}
+function renderLint(el){
+  const L = lintData();
+  const sec = (title, desc, items, row) => { const d = document.createElement("div"); d.className = "lint"; d.innerHTML = `<h2>${title}<span>${items.length ? items.length + "개" : "문제 없음"}</span></h2><p class="d">${desc}</p>`; items.forEach(it => d.appendChild(row(it))); el.appendChild(d); };
+  const noteRow = (n, sub) => { const r = document.createElement("div"); r.className = "row"; r.innerHTML = `${dotFor(n)}<span class="t"></span>`; const b = document.createElement("button"); b.className = "link"; b.textContent = n.title; b.onclick = () => openNote(n.id); r.querySelector(".t").appendChild(b); if (sub) { const s = document.createElement("small"); s.textContent = sub; r.querySelector(".t").appendChild(s); } return r; };
+  sec("없는 노트로 가는 링크", "링크는 걸렸는데 노트가 아직 없어요.", L.ghosts, g => {
+    const r = document.createElement("div"); r.className = "row"; r.innerHTML = `${ghostDot}<span class="t"></span>`;
+    const t = r.querySelector(".t"); t.append(document.createTextNode(g.title)); const s = document.createElement("small"); s.textContent = [...g.from].join(", ") + "에서 링크"; t.appendChild(s);
+    if (!readOnly) { const b = document.createElement("button"); b.className = "btn xs line"; b.textContent = "만들기"; b.onclick = () => createNote(g.title); r.appendChild(b); }
+    return r;
+  });
+  sec("연결 없는 노트", "아무 노트와도 이어지지 않았어요.", L.orphans, n => noteRow(n));
+  sec("인용 안 된 소스", "위키 노트가 아직 이 소스를 근거로 쓰지 않았어요.", L.uncitedSrc, n => noteRow(n, "Claude 소스 넣기로 반영할 수 있어요"));
+  sec("확인 필요", "사실 확인이 안 끝난 내용이에요.", L.check, x => noteRow(x.n, x.c ? `확인 필요 ${x.c}곳` : "상태: 확인 필요"));
+  sec("오래 안 고친 진행중 노트", "3주 넘게 수정이 없어요.", L.stale, n => noteRow(n, rel(n.updated) + " 수정"));
+  if (sample) {
+    const d = document.createElement("div"); d.className = "lint";
+    d.innerHTML = `<p class="d">모순이나 기획이 바뀌기 전 내용은 Claude가 읽고 찾아요.</p>`;
+    const b = document.createElement("button"); b.className = "btn sm fill"; b.style.margin = "0 8px"; b.textContent = "Claude로 내용 점검";
+    b.onclick = () => { openClaude("lint"); runLint(); }; d.appendChild(b); el.appendChild(d);
+  }
+}
+function renderLog(el){
+  if (!logEntries.length) { el.innerHTML = `<p class="empty">아직 기록이 없어요.</p>`; return; }
+  const ul = document.createElement("ul"); ul.className = "log";
+  logEntries.slice(0, 120).forEach(e => {
+    const li = document.createElement("li"), n = byTitle(e.title);
+    li.innerHTML = `<div class="when"></div><div><span class="op"></span></div>`;
+    li.querySelector(".when").textContent = rel(e.at); li.querySelector(".op").textContent = e.op;
+    const row = li.children[1];
+    if (n) { const b = document.createElement("button"); b.className = "link"; b.textContent = e.title; b.onclick = () => openNote(n.id); row.appendChild(b); } else row.appendChild(document.createTextNode(e.title));
+    if (e.detail) { const s = document.createElement("div"); s.className = "when"; s.textContent = e.detail; li.appendChild(s); }
+    ul.appendChild(li);
+  });
+  el.appendChild(ul);
+}
+
+// ============ markdown ============
+function inline(s){
+  const codes = []; s = s.replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return `\u0000${codes.length - 1}\u0000`; });
+  s = H(s);
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
+  const idx = titleIdx();
+  const unesc = t => t.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  s = s.replace(/\[\[([^\]|#\n]+)(?:\|([^\]\n]*))?\]\]/g, (_, t, alias) => { const tt = t.trim(); const ex = idx.has(norm(unesc(tt))); return `<button type="button" class="wl${ex ? "" : " ghost"}" data-t="${tt}">${alias || tt}</button>`; });
+  s = s.replace(/(^|[\s(])#([0-9A-Za-z가-힣_\-/]+)/g, (_, pre, t) => `${pre}<button type="button" class="tag" data-tag="${t}">#${t}</button>`);
+  s = s.replace(/(https?:\/\/[^\s<]+)/g, u => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${H(codes[+i])}</code>`);
+}
+function renderMd(body, ro){
+  const lines = (body || "").split("\n"); let out = "", i = 0, para = [], list = null, hc = 0;
+  const flushP = () => { if (para.length) { out += `<p>${para.map(inline).join("<br>")}</p>`; para = []; } };
+  const flushL = () => { if (list) { out += `</${list}>`; list = null; } };
+  while (i < lines.length) {
+    const ln = lines[i]; let m;
+    if (/^```/.test(ln)) { flushP(); flushL(); const buf = []; i++; while (i < lines.length && !/^```/.test(lines[i])) buf.push(lines[i++]); out += `<pre><code>${H(buf.join("\n"))}</code></pre>`; i++; continue; }
+    if ((m = ln.match(/^(#{1,3})\s+(.*)$/))) { flushP(); flushL(); out += `<h${m[1].length} id="h-${hc++}">${inline(m[2])}</h${m[1].length}>`; i++; continue; }
+    if (/^\s*(---|\*\*\*)\s*$/.test(ln)) { flushP(); flushL(); out += "<hr>"; i++; continue; }
+    if (/^>/.test(ln)) { flushP(); flushL(); const q = []; while (i < lines.length && /^>/.test(lines[i])) q.push(lines[i++].replace(/^>\s?/, "")); out += `<blockquote>${q.map(inline).join("<br>")}</blockquote>`; continue; }
+    if (/^\s*\|/.test(ln)) { flushP(); flushL(); const rows = []; while (i < lines.length && /^\s*\|/.test(lines[i])) { const r = lines[i++].trim(); if (!/^\|[\s:|-]+\|?$/.test(r)) rows.push(r.replace(/^\||\|$/g, "").split("|").map(c => inline(c.trim()))); } if (rows.length) { const [hd, ...bd] = rows; out += `<div class="tbl"><table><thead><tr>${hd.map(c => `<th>${c}</th>`).join("")}</tr></thead><tbody>${bd.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`; } continue; }
+    if ((m = ln.match(/^(\s*)[-*]\s\[( |x|X)\]\s+(.*)$/))) { flushP(); if (list !== "ul") { flushL(); out += "<ul>"; list = "ul"; } const done = m[2] !== " "; out += `<li class="task-li${done ? " done" : ""}"><input type="checkbox" data-line="${i}" ${done ? "checked" : ""} ${ro ? "disabled" : ""} aria-label="할 일 완료"><span>${inline(m[3])}</span></li>`; i++; continue; }
+    if ((m = ln.match(/^(\s*)[-*]\s+(.*)$/))) { flushP(); if (list !== "ul") { flushL(); out += "<ul>"; list = "ul"; } out += `<li style="margin-left:${m[1].length * 8}px">${inline(m[2])}</li>`; i++; continue; }
+    if ((m = ln.match(/^(\s*)\d+[.)]\s+(.*)$/))) { flushP(); if (list !== "ol") { flushL(); out += "<ol>"; list = "ol"; } out += `<li>${inline(m[2])}</li>`; i++; continue; }
+    if (!ln.trim()) { flushP(); flushL(); i++; continue; }
+    flushL(); para.push(ln); i++;
+  }
+  flushP(); flushL(); return out;
+}
+function mdClicks(root, getNoteId){
+  root.addEventListener("click", e => {
+    const w = e.target.closest(".wl"); if (w) { const n = byTitle(w.dataset.t); if (n) openNote(n.id); else if (!readOnly) createNote(w.dataset.t); return; }
+    const tg = e.target.closest(".tag"); if (tg) { tagFilter = tg.dataset.tag; leftTab = "files"; document.querySelectorAll("#lSeg button").forEach(x => x.setAttribute("aria-selected", String(x.dataset.tab === "files"))); activate("graph"); renderLeft(); return; }
+    const cb = e.target.closest('input[type=checkbox][data-line]'); if (cb) toggleTask(getNoteId(), +cb.dataset.line);
+  });
+}
+
+// ============ doc (center note) ============
+let titleBefore = "";
+function renderDoc(){
+  const el = $("doc"); el.innerHTML = ""; const id = active; if (id === "graph") return;
+  const n = notes.get(id);
+  if (!n) { el.innerHTML = `<p class="crumb">없는 노트</p><h1 class="d-title"></h1><p class="md-empty">삭제됐거나 아직 없는 노트예요.</p>`; el.querySelector(".d-title").textContent = nodeById.get(id)?.title || ""; return; }
+  const src = isSource(n), ro = readOnly || src;
+  el.insertAdjacentHTML("beforeend", `<p class="crumb">${dotFor(n)}${H(src ? "소스" : gLabel(gOf(n)))}</p>`);
+  const ti = document.createElement("textarea"); ti.className = "d-title"; ti.id = "dTitle"; ti.rows = 1; ti.value = n.title; ti.readOnly = ro; ti.setAttribute("aria-label", "제목");
+  const fitTitle = () => { ti.style.height = "auto"; ti.style.height = ti.scrollHeight + "px"; };
+  ti.addEventListener("focus", () => titleBefore = n.title);
+  ti.addEventListener("input", () => { ti.value = ti.value.replace(/\n/g, ""); n.title = ti.value; touch(id); fitTitle(); rebuild(); renderTabs(); });
+  ti.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); ti.blur(); } });
+  ti.addEventListener("blur", () => commitTitle(id, ti));
+  el.appendChild(ti); requestAnimationFrame(fitTitle);
+
+  const props = document.createElement("div"); props.className = "props";
+  const sel = (opts, val, onch) => { const c = document.createElement("label"); c.className = "pchip"; const s = document.createElement("select"); s.disabled = readOnly; opts.forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; s.appendChild(o); }); s.value = val; s.onchange = () => onch(s.value); c.appendChild(s); props.appendChild(c); return c; };
+  const g = sel(GROUPS.map(x => [x.id, x.label]), gOf(n), v => { n.group = v; touch(id); queueSave(id, 0); rebuild(); renderLegend(); renderTabs(); renderDoc(); renderLeftIfFiles(); });
+  g.insertAdjacentHTML("afterbegin", `<span class="dot" style="background:var(--g-${gOf(n)})"></span>`); g.setAttribute("aria-label", "분류");
+  const st = sel(STATUSES.map(x => [x, x]), n.status || "진행중", v => { const old = n.status; n.status = v; touch(id); queueSave(id, 0); addLog("상태 변경", n.title, `${old || "진행중"} → ${v}`); renderLeftIfFiles(); });
+  st.setAttribute("aria-label", "상태");
+  if (n.date) props.insertAdjacentHTML("beforeend", `<span class="pchip static">${H(n.date)}</span>`);
+  props.insertAdjacentHTML("beforeend", `<span class="pchip static">${src ? "소스 · 수정 안 함" : "수정 " + H(rel(n.updated) || "기록 없음")}</span>`);
+  el.appendChild(props);
+
+  const bar = document.createElement("div"); bar.className = "d-bar";
+  if (!ro) { const b = document.createElement("button"); b.className = "btn xs " + (editing ? "fill" : "line"); b.textContent = editing ? "완료" : "편집"; b.onclick = () => toggleEdit(); bar.appendChild(b); }
+  bar.insertAdjacentHTML("beforeend", `<span class="spacer"></span><span class="state" id="saveState"></span>`);
+  el.appendChild(bar);
+
+  if (editing && !ro) {
+    const wrap = document.createElement("div"); wrap.className = "editor";
+    const ta = document.createElement("textarea"); ta.id = "dText"; ta.value = n.body || ""; ta.setAttribute("aria-label", "본문 (마크다운)"); ta.spellcheck = false;
+    const sug = document.createElement("ul"); sug.className = "suggest"; sug.hidden = true;
+    wrap.append(ta, sug); el.appendChild(wrap);
+    el.insertAdjacentHTML("beforeend", `<p class="hint"><code>[[노트]]</code> 연결 · <code>#태그</code> · <code>- [ ] 할 일</code> · <code>## 제목</code> · ⌘E 보기 전환</p>`);
+    let rt;
+    ta.addEventListener("input", () => { n.body = ta.value; touch(id); queueSave(id); clearTimeout(rt); rt = setTimeout(() => { rebuild(); renderRight(); renderRefs(); }, 450); autoSize(ta); suggest(ta, sug); });
+    ta.addEventListener("keydown", e => suggestKeys(e, ta, sug));
+    ta.addEventListener("blur", () => setTimeout(() => sug.hidden = true, 150));
+    requestAnimationFrame(() => autoSize(ta));
+  } else {
+    const md = document.createElement("div"); md.className = "md"; md.id = "dRead";
+    md.innerHTML = n.body && n.body.trim() ? renderMd(n.body, ro) : `<p class="md-empty">${ro ? "내용 없음" : "비어 있어요. 편집을 눌러 적어 보세요."}</p>`;
+    el.appendChild(md);
+  }
+  const refs = document.createElement("section"); refs.className = "refs"; refs.id = "dRefs"; el.appendChild(refs); renderRefs();
+  if (!ro) { const del = document.createElement("button"); del.className = "danger-link"; del.textContent = "노트 삭제"; let armT; del.onclick = () => { if (del.classList.contains("armed")) { clearTimeout(armT); deleteNote(id); return; } del.classList.add("armed"); del.textContent = "한 번 더 누르면 삭제돼요"; armT = setTimeout(() => { del.classList.remove("armed"); del.textContent = "노트 삭제"; }, 3000); }; el.appendChild(del); }
+  updateSaveState();
+}
+mdClicks($("doc"), () => active);
+function toggleEdit(){ const n = notes.get(active); if (!n || readOnly || isSource(n)) return; editing = !editing; renderDoc(); if (editing) setTimeout(() => $("dText")?.focus(), 30); }
+function autoSize(ta){ ta.style.height = "auto"; ta.style.height = Math.max(360, ta.scrollHeight + 4) + "px"; }
+function renderRefs(){
+  const el = $("dRefs"); const n = notes.get(active); if (!el || !n) return; el.innerHTML = "";
+  const back = [...notes.values()].filter(o => o.id !== n.id && parseLinks(o.body).some(t => norm(t) === norm(n.title)));
+  el.insertAdjacentHTML("beforeend", `<h2>백링크<span>${back.length}개 노트가 이 노트를 가리켜요</span></h2>`);
+  if (!back.length) el.insertAdjacentHTML("beforeend", `<p class="empty" style="padding:0 0 10px">아직 없어요</p>`);
+  back.forEach(o => {
+    const r = document.createElement("div"); r.className = "ref";
+    const t = document.createElement("div"); t.className = "rt"; t.innerHTML = dotFor(o);
+    const b = document.createElement("button"); b.className = "link"; b.textContent = o.title; b.onclick = () => openNote(o.id); t.appendChild(b); r.appendChild(t);
+    const line = (o.body || "").split("\n").find(l => new RegExp("\\[\\[\\s*" + reEsc(n.title) + "\\s*(?:[|#][^\\]]*)?\\]\\]", "i").test(l));
+    if (line) { const s = document.createElement("div"); s.className = "rs"; s.innerHTML = H(line.replace(/^\s*[-*]\s(\[[ xX]\]\s)?/, "").replace(/\[\[([^\]|#\n]+)(?:[|#][^\]\n]*)?\]\]/g, "⟦$1⟧")).replace(/⟦([^⟧]+)⟧/g, (_, t) => norm(t) === norm(n.title) ? `<mark>${t}</mark>` : t); r.appendChild(s); }
+    el.appendChild(r);
+  });
+  const um = unlinked(n);
+  el.insertAdjacentHTML("beforeend", `<h2 style="margin-top:28px">연결 안 된 언급<span>제목이 나오지만 링크가 없어요</span></h2>`);
+  if (!um.length) el.insertAdjacentHTML("beforeend", `<p class="empty" style="padding:0">없어요</p>`);
+  um.forEach(o => {
+    const r = document.createElement("div"); r.className = "ref";
+    const t = document.createElement("div"); t.className = "rt"; t.innerHTML = dotFor(o);
+    const b = document.createElement("button"); b.className = "link"; b.textContent = o.title; b.onclick = () => openNote(o.id); t.appendChild(b);
+    t.insertAdjacentHTML("beforeend", `<span class="spacer"></span>`);
+    if (!readOnly && !isSource(o)) { const lb = document.createElement("button"); lb.className = "btn xs line"; lb.textContent = "링크 걸기"; lb.onclick = () => linkMention(o.id, n.title); t.appendChild(lb); }
+    r.appendChild(t);
+    const s = document.createElement("div"); s.className = "rs"; const sn = snippetAround(o.body, n.title);
+    s.innerHTML = H(sn).replace(new RegExp(reEsc(H(n.title)), "i"), m => `<mark>${m}</mark>`); r.appendChild(s);
+    el.appendChild(r);
+  });
+}
+function unlinked(n){
+  const t = norm(n.title); if (t.length < 2) return [];
+  return [...notes.values()].filter(o => o.id !== n.id && !parseLinks(o.body).some(x => norm(x) === t) && norm((o.body || "").replace(/\[\[[^\]]*\]\]/g, " ")).includes(t));
+}
+function snippetAround(body, title){
+  const b = (body || "").replace(/\[\[[^\]]*\]\]/g, " ").replace(/\s+/g, " "), i = norm(b).indexOf(norm(title));
+  if (i < 0) return ""; const s = Math.max(0, i - 40); return (s ? "…" : "") + b.slice(s, i + title.length + 50) + "…";
+}
+function linkMention(oid, title){
+  const o = notes.get(oid); if (!o || readOnly || isSource(o)) return;
+  const re = new RegExp("(" + reEsc(title) + ")", "i"), parts = o.body.split(/(\[\[[^\]]*\]\])/); let done = false;
+  for (let i = 0; i < parts.length && !done; i++) { if (parts[i].startsWith("[[")) continue; if (re.test(parts[i])) { parts[i] = parts[i].replace(re, `[[${title}]]`); done = true; } }
+  if (!done) return;
+  o.body = parts.join(""); touch(oid); queueSave(oid, 0); rebuild(); renderRefs(); renderRight(); toast(`'${o.title}'에 링크를 걸었어요`);
+}
+function commitTitle(id, ti){
+  const n = notes.get(id); if (!n || isSource(n)) return;
+  let t = ti.value.trim(); if (!t) { t = titleBefore || "제목 없음"; ti.value = t; }
+  if ([...notes.values()].some(o => o.id !== id && norm(o.title) === norm(t))) { toast("같은 이름의 노트가 이미 있어요"); t = titleBefore; ti.value = t; }
+  n.title = t; const old = titleBefore;
+  if (old && norm(old) !== norm(t)) { renameRefs(id, old, t); addLog("이름 변경", t, `${old} → ${t}`); }
+  titleBefore = t; rebuild(); renderTabs(); renderRight(); renderLeftIfFiles(); queueSave(id, 0);
+}
+function renameRefs(id, old, t){
+  const re = new RegExp("\\[\\[\\s*" + reEsc(old) + "\\s*((?:[|#][^\\]]*)?)\\]\\]", "gi");
+  notes.forEach(o => { if (o.id === id || !o.body || isSource(o)) return; const nb = o.body.replace(re, (_, rest) => `[[${t}${rest}]]`); if (nb !== o.body) { o.body = nb; touch(o.id); queueSave(o.id, 0); } });
+}
+let sugIdx = 0, sugItems = [];
+function suggest(ta, sug){
+  const m = ta.value.slice(0, ta.selectionStart).match(/\[\[([^\]\n]*)$/); if (!m) { sug.hidden = true; return; }
+  const q = norm(m[1]);
+  sugItems = [...notes.values()].filter(n => n.id !== active && norm(n.title).includes(q)).sort((a, b) => norm(b.title).startsWith(q) - norm(a.title).startsWith(q)).slice(0, 7);
+  if (!sugItems.length) { sug.hidden = true; return; }
+  sugIdx = 0; sug.innerHTML = "";
+  sugItems.forEach((n, i) => { const li = document.createElement("li"); if (!i) li.className = "on"; li.innerHTML = dotFor(n); li.append(document.createTextNode(n.title)); li.onmousedown = e => { e.preventDefault(); applySug(ta, sug, n.title); }; sug.appendChild(li); });
+  sug.hidden = false;
+}
+function suggestKeys(e, ta, sug){
+  if (sug.hidden) return; const lis = sug.querySelectorAll("li");
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); lis[sugIdx].classList.remove("on"); sugIdx = (sugIdx + (e.key === "ArrowDown" ? 1 : -1) + lis.length) % lis.length; lis[sugIdx].classList.add("on"); }
+  else if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); applySug(ta, sug, sugItems[sugIdx].title); }
+  else if (e.key === "Escape") { e.stopPropagation(); sug.hidden = true; }
+}
+function applySug(ta, sug, title){
+  const pos = ta.selectionStart, before = ta.value.slice(0, pos), after = ta.value.slice(pos), st = before.lastIndexOf("[[");
+  ta.value = before.slice(0, st) + "[[" + title + "]]" + (after.startsWith("]]") ? after.slice(2) : after);
+  const c = st + title.length + 4; ta.setSelectionRange(c, c); sug.hidden = true; ta.dispatchEvent(new Event("input"));
+}
+
+// ============ right ============
+document.querySelectorAll("#rSeg button").forEach(b => b.onclick = () => setRightTab(b.dataset.rtab));
+function setRightTab(t){
+  rightTab = t; document.querySelectorAll("#rSeg button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.rtab === t)));
+  $("rInfo").hidden = t !== "info"; $("rClaude").hidden = t !== "claude";
+  if (t === "claude") { renderComposer(); if (!$("cLog").children.length) renderIntro(); } else renderRight();
+}
+function openClaude(m){ if (mobile()) { app.classList.add("m-right"); app.classList.remove("m-left"); } else app.classList.remove("no-right"); setRightTab("claude"); if (m) setMode(m); }
+function chip(id){
+  const n = notes.get(id), nd = nodeById.get(id), title = n ? n.title : nd ? nd.title : id.replace(/^ghost:/, "");
+  const b = document.createElement("button"); b.className = "chip" + (n ? "" : " ghost");
+  b.innerHTML = (n ? dotFor(n) : ghostDot) + `<span></span>`; b.lastChild.textContent = title;
+  b.onclick = () => n ? openNote(id) : (!readOnly && createNote(title));
+  return b;
+}
+function renderRight(){
+  if (rightTab !== "info") return;
+  const el = $("rInfo"); el.innerHTML = "";
+  const focusId = active !== "graph" ? active : selectedId;
+  const n = focusId ? notes.get(focusId) : null;
+  if (active === "graph" && !focusId) {
+    let pages = 0, srcs = 0, open = 0; notes.forEach(x => { isSource(x) ? srcs++ : pages++; open += parseTasks(x.body).filter(t => !t.done).length; });
+    el.insertAdjacentHTML("beforeend", `<div class="stat"><div><b>${pages}</b><span>노트</span></div><div><b>${links.length}</b><span>연결</span></div><div><b>${open}</b><span>할 일</span></div></div>`);
+    const s = document.createElement("div"); s.className = "r-sec recent"; s.innerHTML = `<h3><span>최근 수정</span></h3>`;
+    [...notes.values()].sort((a, b) => (b.updated || 0) - (a.updated || 0)).slice(0, 8).forEach(x => { const b = document.createElement("button"); b.innerHTML = `${dotFor(x)}<span class="t"></span><span class="m"></span>`; b.querySelector(".t").textContent = x.title; b.querySelector(".m").textContent = rel(x.updated); b.onclick = () => { select(x.id); const nd = nodeById.get(x.id); if (nd) centerOn(nd); }; s.appendChild(b); });
+    el.appendChild(s);
+    el.insertAdjacentHTML("beforeend", `<p class="r-empty">노드를 누르면 여기서 미리 보고, 두 번 누르면 노트가 탭으로 열려요.</p>`);
+    return;
+  }
+  if (!n) {
+    const nd = nodeById.get(focusId);
+    el.innerHTML = `<p class="pv-title"></p><p class="pv-meta">아직 없는 노트</p>`; el.querySelector(".pv-title").textContent = nd ? nd.title : "";
+    if (!readOnly && nd) { const b = document.createElement("button"); b.className = "btn sm fill"; b.textContent = "이 노트 만들기"; b.onclick = () => createNote(nd.title); el.appendChild(b); }
+    return;
+  }
+  if (active === "graph") {
+    const pvw = document.createElement("div"); pvw.className = "r-sec pv";
+    pvw.innerHTML = `<p class="crumb" style="margin:0">${dotFor(n)}${H(isSource(n) ? "소스" : gLabel(gOf(n)))}</p><p class="pv-title"></p><p class="pv-meta"></p><div class="md"></div>`;
+    pvw.querySelector(".pv-title").textContent = n.title;
+    pvw.querySelector(".pv-meta").textContent = [n.date, n.status || "진행중", rel(n.updated) + " 수정"].filter(Boolean).join(" · ");
+    pvw.querySelector(".md").innerHTML = n.body && n.body.trim() ? renderMd(n.body, true) : `<p class="md-empty">내용 없음</p>`;
+    mdClicks(pvw, () => n.id);
+    const ob = document.createElement("button"); ob.className = "btn sm fill"; ob.style.marginTop = "12px"; ob.textContent = "노트 열기"; ob.onclick = () => openNote(n.id);
+    pvw.appendChild(ob); el.appendChild(pvw);
+  }
+  const lg = document.createElement("div"); lg.className = "r-sec";
+  lg.innerHTML = `<h3><span>주변 연결</span><span>눌러서 이동</span></h3><canvas id="local" aria-label="이 노트 주변 연결"></canvas>`;
+  el.appendChild(lg); new ResizeObserver(() => drawLocal()).observe(lg.querySelector("canvas"));
+  if (active !== "graph") {
+    const heads = [...(n.body || "").matchAll(/^(#{1,3})\s+(.*)$/gm)];
+    if (heads.length) {
+      const o = document.createElement("div"); o.className = "r-sec outline"; o.innerHTML = `<h3><span>목차</span></h3>`;
+      heads.forEach((h, i) => { const a = document.createElement("a"); a.className = "h" + h[1].length; a.textContent = plain(h[2]); a.onclick = () => { if (editing) toggleEdit(); setTimeout(() => $("h-" + i)?.scrollIntoView({behavior:reduceMotion ? "auto" : "smooth", block:"start"}), 30); }; o.appendChild(a); });
+      el.appendChild(o);
+    }
+  }
+  const idx = titleIdx();
+  const out = [...new Set(parseLinks(n.body).map(t => idx.get(norm(t)) || "ghost:" + norm(t)))].filter(x => x !== n.id);
+  const back = [...notes.values()].filter(o => o.id !== n.id && parseLinks(o.body).some(t => norm(t) === norm(n.title))).map(o => o.id);
+  const sec = (title, ids) => { const s = document.createElement("div"); s.className = "r-sec"; s.innerHTML = `<h3><span>${title}</span><span>${ids.length}</span></h3>`; const c = document.createElement("div"); c.className = "chips"; ids.forEach(x => c.appendChild(chip(x))); if (!ids.length) c.innerHTML = `<span class="r-empty" style="font-size:12px">없음</span>`; s.appendChild(c); el.appendChild(s); };
+  sec("나가는 링크", out); sec("들어오는 링크", back);
+  const tags = parseTags(n.body);
+  if (tags.length) { const s = document.createElement("div"); s.className = "r-sec"; s.innerHTML = `<h3><span>태그</span></h3><div class="chips">${tags.map(t => `<button class="chip" data-tag="${H(t)}"><span>#${H(t)}</span></button>`).join("")}</div>`; s.querySelectorAll("[data-tag]").forEach(b => b.onclick = () => { tagFilter = b.dataset.tag; activate("graph"); renderLeft(); }); el.appendChild(s); }
+}
+let localNodes = [], localHover = null;
+function drawLocal(){
+  const c = $("local"); const id = active !== "graph" ? active : selectedId; if (!c || !id) return;
+  const r = c.getBoundingClientRect(); if (!r.width) return;
+  const w = r.width, h = r.height, pr = Math.min(devicePixelRatio || 1, 2);
+  c.width = w * pr; c.height = h * pr; const g = c.getContext("2d"); g.setTransform(pr, 0, 0, pr, 0, 0);
+  g.fillStyle = C.canvas; g.fillRect(0, 0, w, h);
+  const n0 = notes.get(id);
+  const center = nodeById.get(id) || {id, title:n0?.title || "", group:gOf(n0), source:isSource(n0)};
+  const nb = [...neighbours(id)].filter(x => x !== id).map(x => nodeById.get(x)).filter(Boolean);
+  const cx = w / 2, cy = h / 2 - 6, rx = w / 2 - 40, ry = h / 2 - 34;
+  localNodes = [{nd:center, x:cx, y:cy}];
+  nb.forEach((nd, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(1, nb.length), ring = nb.length > 8 && i % 2 ? .55 : 1; localNodes.push({nd, x:cx + Math.cos(a) * rx * ring, y:cy + Math.sin(a) * ry * ring}); });
+  g.lineWidth = 1;
+  localNodes.slice(1).forEach(p => { g.strokeStyle = rgba(C[center.group] || C.link, .45); g.beginPath(); g.moveTo(cx, cy); g.lineTo(p.x, p.y); g.stroke(); });
+  g.textAlign = "center"; g.textBaseline = "top"; g.font = `400 12px ${C.font}`;
+  localNodes.forEach((p, i) => {
+    const nd = p.nd, rr = i ? 4.5 : 7, col = nd.ghost ? C.ink2 : C[nd.group];
+    if (!i) { const gr = g.createRadialGradient(p.x, p.y, 0, p.x, p.y, 28); gr.addColorStop(0, rgba(col, .3)); gr.addColorStop(1, rgba(col, 0)); g.fillStyle = gr; g.beginPath(); g.arc(p.x, p.y, 28, 0, Math.PI * 2); g.fill(); }
+    g.beginPath(); g.arc(p.x, p.y, rr, 0, Math.PI * 2);
+    if (nd.ghost) { g.setLineDash([2, 2]); g.strokeStyle = col; g.stroke(); g.setLineDash([]); }
+    else if (nd.source) { g.fillStyle = C.canvas; g.fill(); g.strokeStyle = col; g.lineWidth = 2; g.stroke(); g.lineWidth = 1; }
+    else { g.fillStyle = col; g.fill(); }
+    const showL = !i || nb.length <= 8 || nd.id === localHover; if (!showL) return;
+    const lim = nd.id === localHover ? 40 : 10, label = nd.title.length > lim ? nd.title.slice(0, lim - 1) + "…" : nd.title;
+    g.lineWidth = 3; g.strokeStyle = C.canvas; g.strokeText(label, p.x, p.y + rr + 5); g.lineWidth = 1;
+    g.fillStyle = i ? C.ink2 : C.ink; g.fillText(label, p.x, p.y + rr + 5);
+  });
+}
+document.addEventListener("mousemove", e => {
+  if (e.target.id !== "local") { if (localHover) { localHover = null; drawLocal(); } return; }
+  const r = e.target.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  const hp = localNodes.slice(1).find(p => Math.hypot(p.x - x, p.y - y) < 14), id = hp ? hp.nd.id : null;
+  if (id !== localHover) { localHover = id; drawLocal(); }
+});
+document.addEventListener("click", e => {
+  if (e.target.id !== "local") return;
+  const r = e.target.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  const hp = localNodes.slice(1).find(p => Math.hypot(p.x - x, p.y - y) < 16); if (!hp) return;
+  if (active === "graph") { select(hp.nd.id); const nd = nodeById.get(hp.nd.id); if (nd) centerOn(nd, cam.k); } else openNote(hp.nd.id);
+});
+
+// ============ create / delete ============
+function uniqueTitle(base){ const idx = titleIdx(); if (!idx.has(norm(base))) return base; let i = 2; while (idx.has(norm(base + " " + i))) i++; return base + " " + i; }
+function newId(){ return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function createNote(title, extra = {}){
+  if (readOnly) return null;
+  const from = (active !== "graph" ? notes.get(active) : null) || (selectedId && notes.get(selectedId));
+  const t = title || uniqueTitle("새 노트"), id = newId(), now = Date.now();
+  const n = {id, title:t, type:"page", group: from && !isSource(from) ? gOf(from) : "etc", status:"진행중", body: (!title && from) ? `[[${from.title}]]\n\n` : "", created:now, updated:now, ...extra};
+  delete n.silent; delete n.logDetail;
+  notes.set(id, n); touch(id); rebuild(); renderLegend();
+  const nd = nodeById.get(id), an = from ? nodeById.get(from.id) : null; if (an && nd) { nd.x = an.x + 24; nd.y = an.y + 24; }
+  queueSave(id, 0); addLog("생성", t, extra.logDetail || "");
+  if (!extra.silent) { editing = true; openNote(id); if (!title) setTimeout(() => { const ti = $("dTitle"); if (ti) { ti.focus(); ti.select(); } }, 60); }
+  refreshAll(); return n;
+}
+async function deleteNote(id){
+  const n = notes.get(id); if (!n) return;
+  notes.delete(id); tabs = tabs.filter(t => t !== id); if (selectedId === id) selectedId = null; activate("graph"); rebuild(); renderLegend(); refreshAll();
+  try { if (mode === "db") await db.collection("notes").doc(id).delete(); else saveLocal(); addLog("삭제", n.title, ""); toast("삭제했어요"); } catch (e) { writeErr(e); }
+}
+
+// ============ persistence ============
+function touch(id){ editedAt[id] = Date.now(); const n = notes.get(id); if (n) n.updated = Date.now(); }
+function updateSaveState(){ const el = $("saveState"); if (!el) return; el.textContent = readOnly ? "보기 전용" : isSource(notes.get(active)) ? "소스는 원본 그대로 둬요" : pending ? "저장 중" : mode === "local" ? "이 기기에 저장됨" : "저장됨"; }
+function queueSave(id, delay = 700){
+  if (readOnly) return; clearTimeout(saveTimers[id]);
+  if (!saveTimers[id + ":p"]) { pending++; saveTimers[id + ":p"] = 1; }
+  updateSaveState();
+  saveTimers[id] = setTimeout(() => { saveTimers[id + ":p"] = 0; saveChains[id] = (saveChains[id] || Promise.resolve()).then(() => writeNote(id)).catch(writeErr).finally(() => { pending = Math.max(0, pending - 1); updateSaveState(); }); }, delay);
+  const n = notes.get(id);
+  if (n && delay > 0 && (!lastEditLog[id] || Date.now() - lastEditLog[id] > 10 * 60000)) { lastEditLog[id] = Date.now(); setTimeout(() => addLog("수정", n.title, ""), 1500); }
+}
+async function writeNote(id){
+  const n = notes.get(id); if (!n) return;
+  const body = {title:n.title, type:n.type || "page", group:gOf(n), folder:gLabel(gOf(n)), status:n.status || "진행중", date:n.date || "", body:n.body || "", created:n.created || n.updated || Date.now(), updated:n.updated || Date.now()};
+  if (mode === "db") await db.collection("notes").doc(id).set(body); else saveLocal();
+}
+function saveLocal(){ try { localStorage.setItem(LS_NOTES, JSON.stringify([...notes.values()])); localStorage.setItem(LS_LOG, JSON.stringify(logEntries.slice(0, 300))); } catch (e) { toast("이 브라우저에 저장할 수 없어요"); } }
+async function addLog(op, title, detail){
+  if (readOnly) return;
+  const e = {at:Date.now(), op, title:String(title || ""), detail:String(detail || "").slice(0, 200)};
+  if (mode === "db") { try { await db.collection("log").add(e); } catch (err) {} }
+  else { logEntries.unshift(e); saveLocal(); if (leftTab === "log") renderLeft(); }
+}
+function writeErr(e){
+  const c = e && e.code;
+  if (c === "invalid_argument" || c === "not_granted" || c === "revoked") { setRO(true); toast("편집 권한이 없어 저장하지 못했어요"); }
+  else if (c === "quota_exceeded") toast("저장 공간이 찼어요. 안 쓰는 노트를 지워 주세요");
+  else if (c === "resource_exhausted") toast("요청이 많아요. 잠시 후 다시 해 주세요");
+  else toast("저장하지 못했어요. 잠시 후 다시 해 주세요");
+}
+function setRO(v){ readOnly = v; editing = false; renderTabs(); if (active !== "graph") renderDoc(); rebuild(); renderLeft(); renderRight(); }
+function refreshAll(){ updateStats(); renderLeft(); }
+
+// ============ palette ============
+let pItems = [], pIdx = 0;
+function openPalette(){ $("scrim").hidden = false; $("pInput").value = ""; renderPalette(""); setTimeout(() => $("pInput").focus(), 10); }
+function closePalette(){ $("scrim").hidden = true; }
+$("openPalette").onclick = openPalette;
+$("scrim").addEventListener("pointerdown", e => { if (e.target.id === "scrim") closePalette(); });
+function renderPalette(q){
+  const nq = norm(q);
+  const cmds = [
+    {label:"새 노트", k:"N", run:() => createNote(), hide:readOnly},
+    {label:"그래프 보기", k:"G", run:() => activate("graph")},
+    {label:"할 일 보기", run:() => pickTab("tasks")},
+    {label:"점검 보기", run:() => pickTab("lint")},
+    {label:"기록 보기", run:() => pickTab("log")},
+    {label:"Claude에게 질문", run:() => openClaude("ask"), hide:!sample},
+    {label:"Claude로 소스 넣기", run:() => openClaude("ingest"), hide:!sample || readOnly},
+  ].filter(c => !c.hide && (!nq || norm(c.label).includes(nq)));
+  const ns = [...notes.values()].filter(n => !nq || norm(n.title).includes(nq) || norm(n.body).includes(nq))
+    .sort((a, b) => (norm(b.title).includes(nq) - norm(a.title).includes(nq)) || (norm(b.title).startsWith(nq) - norm(a.title).startsWith(nq)) || (b.updated || 0) - (a.updated || 0)).slice(0, 12);
+  pItems = [...ns.map(n => ({label:n.title, icon:dotFor(n), k:!nq || norm(n.title).includes(nq) ? (isSource(n) ? "소스" : gLabel(gOf(n))) : "본문에 있음", run:() => openNote(n.id)})), ...cmds.map(c => ({...c, icon:`<span style="width:8px;color:var(--ink-2)">›</span>`}))];
+  if (nq && !byTitle(q.trim()) && !readOnly) pItems.push({label:`'${q.trim()}' 노트 만들기`, icon:`<span style="width:8px;color:var(--link)">+</span>`, run:() => createNote(q.trim())});
+  pIdx = 0; const ul = $("pList"); ul.innerHTML = "";
+  if (!pItems.length) { ul.innerHTML = `<li style="color:var(--ink-2);cursor:default">맞는 게 없어요</li>`; return; }
+  pItems.forEach((it, i) => { const li = document.createElement("li"); li.setAttribute("role", "option"); if (!i) li.className = "on"; li.innerHTML = it.icon; li.append(document.createTextNode(it.label)); if (it.k) { const k = document.createElement("span"); k.className = "k"; k.textContent = it.k; li.appendChild(k); } li.onclick = () => { closePalette(); it.run(); }; ul.appendChild(li); });
+}
+$("pInput").addEventListener("input", e => renderPalette(e.target.value));
+$("pInput").addEventListener("keydown", e => {
+  const lis = $("pList").querySelectorAll("li");
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); if (!pItems.length) return; lis[pIdx]?.classList.remove("on"); pIdx = (pIdx + (e.key === "ArrowDown" ? 1 : -1) + pItems.length) % pItems.length; lis[pIdx].classList.add("on"); lis[pIdx].scrollIntoView({block:"nearest"}); }
+  else if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); const it = pItems[pIdx]; if (it) { closePalette(); it.run(); } }
+  else if (e.key === "Escape") closePalette();
+});
+
+// ============ Claude ============
+let sample = null, toolsOK = false, turns = [], busy = false, ctl = null, cMode = "ask", statusEl = null;
+async function bootClaude(){
+  try { sample = await window.claude.use("sample"); } catch (e) { sample = null; }
+  if (!sample) return;
+  try { const l = await sample.limits(); toolsOK = !!(l && l.tools); } catch (e) { toolsOK = false; }
+  $("rTabClaude").hidden = false; if (leftTab === "lint") renderLeft();
+}
+document.querySelectorAll("#cModes button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+function setMode(m){ cMode = m; document.querySelectorAll("#cModes button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.mode === m))); renderComposer(); if (!$("cLog").children.length || $("cLog").querySelector(".c-intro")) renderIntro(); }
+function renderIntro(){
+  const log = $("cLog"); log.innerHTML = ""; const d = document.createElement("div"); d.className = "c-intro";
+  if (cMode === "ask") {
+    d.innerHTML = `<p>위키 전체를 읽고 답해요. 좋은 답은 노트로 저장할 수 있어요.</p>`;
+    ["세특 활동들이랑 기계공학 진로 연결고리 봐줘", "중앙대 수능최저 3합7 맞추려면 뭐가 부족해?", "3학년 탐구주제 하나 골라줘"].forEach(q => { const b = document.createElement("button"); b.className = "btn sm plain"; b.textContent = q; b.onclick = () => ask(q); d.appendChild(b); });
+  } else if (cMode === "ingest") d.innerHTML = `<p>세특 원문, 탐구보고서, 모의고사 결과 같은 원본을 붙여넣으면 소스로 보관하고, Claude가 관련 노트를 고치거나 새로 만들어 연결해요. 소스는 원본 그대로 둬요.</p>`;
+  else d.innerHTML = `<p>노트 전체를 읽고 모순, 예전 계획이 남은 내용, 확인 안 된 사실, 빠진 연결을 찾아요. 고치지는 않고 보고만 해요.</p>`;
+  log.appendChild(d);
+}
+function renderComposer(){
+  const c = $("composer"); c.innerHTML = "";
+  if (cMode === "ask") {
+    c.innerHTML = `<div class="row"><div><label class="sr-only" for="cInput">질문</label><textarea id="cInput" rows="1" placeholder="위키에 물어보기"></textarea></div><button class="btn sm fill" id="cSend">보내기</button></div>`;
+    const ta = $("cInput");
+    ta.addEventListener("input", () => { ta.style.height = "auto"; ta.style.height = Math.min(140, ta.scrollHeight) + "px"; });
+    ta.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("cSend").click(); } });
+    $("cSend").onclick = () => { if (busy) { ctl?.abort(); return; } const v = ta.value.trim(); if (!v) return; ta.value = ""; ta.style.height = "auto"; ask(v); };
+  } else if (cMode === "ingest") {
+    c.innerHTML = `<label class="sr-only" for="iTitle">소스 제목</label><input id="iTitle" placeholder="소스 제목">
+      <div style="margin-top:8px"><label class="sr-only" for="iGroup">분류</label><select id="iGroup">${GROUPS.map(g => `<option value="${g.id}" ${g.id === "activity" ? "selected" : ""}>${g.label}</option>`).join("")}</select></div>
+      <div style="margin-top:8px"><label class="sr-only" for="iBody">원문</label><textarea id="iBody" rows="6" placeholder="원문 그대로 붙여넣기"></textarea></div>
+      <div class="row"><span class="note">${toolsOK ? "관련 노트가 자동으로 고쳐져요" : "여기선 정리 제안만 받아요"}</span><button class="btn sm fill" id="iSend" ${readOnly ? "disabled" : ""}>넣고 정리</button></div>`;
+    $("iSend").onclick = () => { if (busy) { ctl?.abort(); return; } const t = $("iTitle").value.trim(), b = $("iBody").value.trim(); if (!b) { toast("원문을 붙여넣어 주세요"); return; } ingest(t, b, $("iGroup").value); };
+  } else {
+    c.innerHTML = `<div class="row"><span class="note">위키 전체를 읽어서 사용량이 조금 더 들어요</span><button class="btn sm fill" id="lSend">점검 시작</button></div>`;
+    $("lSend").onclick = () => { if (busy) { ctl?.abort(); return; } runLint(); };
+  }
+}
+$("cLog").addEventListener("click", e => { const w = e.target.closest(".wl"); if (!w) return; const n = byTitle(w.dataset.t); if (n) openNote(n.id); else toast("위키에 없는 노트예요"); });
+function mdMsg(el, text){
+  let s = H(text).replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\[\[([^\]\n|#]+)(?:[|#][^\]\n]*)?\]\]/g, (_, t) => `<button type="button" class="wl" data-t="${t.trim()}">${t.trim()}</button>`);
+  el.innerHTML = s;
+}
+function indexText(full){
+  const arr = [...notes.values()].sort((a, b) => a.title.localeCompare(b.title, "ko"));
+  const s = arr.map(n => full
+    ? `### ${n.title}\n(${isSource(n) ? "소스" : "위키"}, ${gLabel(gOf(n))}, ${n.status || "진행중"}, ${rel(n.updated)} 수정)\n${(n.body || "").slice(0, 3000)}`
+    : `- ${n.title} [${isSource(n) ? "소스" : "위키"} · ${gLabel(gOf(n))} · ${n.status || "진행중"}]: ${plain(n.body).slice(0, 150)}`).join(full ? "\n\n" : "\n");
+  const cap = full ? 90000 : 30000;
+  return s.length > cap ? s.slice(0, cap) + "\n(이하 생략, search_notes/read_note로 확인)" : s;
+}
+function schema(full){
+  const cur = active !== "graph" ? notes.get(active) : selectedId && notes.get(selectedId);
+  return `너는 재혁의 개인 위키(second brain) '재혁 Vault'를 관리하는 Claude야. 재혁은 일반고 2학년이고 희망 진로는 기계공학 계열(자동차·자율주행·전기차). 생기부, 탐구 활동, 내신·모의고사, 대입 전략을 이 위키로 관리해. 너는 재혁의 대입 상담가이자 학습 튜터야.
+
+위키 구조 (LLM Wiki 방식)
+- 소스: 인터뷰 원문, 조사 자료 같은 원본. 읽기만 하고 절대 고치지 마.
+- 위키 노트: 네가 정리하고 연결하는 노트. 사람은 소스를 고르고 방향을 정하고, 너는 요약, 연결, 정리, 점검을 맡아.
+- 노트끼리는 [[노트 제목]]으로 연결. 태그는 #태그, 할 일은 "- [ ] 내용".
+- 상태: 진행중, 예정, 확인 필요, 완료, 보관.
+
+규칙
+- 새 노트를 만들기 전에 비슷한 노트가 있는지 먼저 찾아서, 있으면 그 노트를 고쳐. 중복 금지.
+- 위키에 사실을 적을 땐 근거 소스를 [[소스 제목]]으로 달아.
+- 노트나 소스에 없는 사실은 지어내지 마. 확실하지 않으면 '확인 필요'.
+- 재혁이 부탁하지 않은 수정은 하지 마. 질문에는 답만 해.
+- 노트 본문은 짧은 ## 제목, - 목록, 할 일 위주로.
+
+말투
+- 친근한 존댓말. 긴 글로 풀지 말고 한눈에 보이게 짧게, 표와 목록 위주로.
+- 노트를 언급할 땐 꼭 [[노트 제목]] 형식.
+- 답 마지막 줄은 "점검:"으로 시작해서, 추측이나 확인 안 된 내용이 있었는지 스스로 밝혀.
+${toolsOK ? "- 도구로 노트를 고쳤으면 뭘 바꿨는지 한두 줄로 알려줘." : "- 지금은 노트를 직접 못 고쳐. 필요하면 어떻게 고칠지 제안만 해."}${readOnly ? "\n- 이 보기는 읽기 전용이라 수정 불가." : ""}
+
+${full ? "위키 전체 내용" : "위키 목록 (index)"}
+${indexText(full)}${cur ? `\n\n지금 보고 있는 노트: ${cur.title}\n---\n${(cur.body || "").slice(0, 4000)}\n---` : ""}`;
+}
+function afterToolWrite(id, op){ touch(id); rebuild(); renderLegend(); queueSave(id, 0); refreshAll(); renderTabs(); const n = notes.get(id); if (n) addLog(op, n.title, "Claude"); const a = document.activeElement; if (active === id && !(a && (a.id === "dTitle" || a.id === "dText"))) renderDoc(); renderRight(); }
+const TOOLS = [
+  {name:"search_notes", description:"제목이나 본문에 검색어가 들어간 노트를 최대 10개 찾아. 제목, 종류, 분류, 상태, 본문 앞부분을 돌려줘.",
+   inputSchema:{type:"object", properties:{query:{type:"string"}}, required:["query"]},
+   execute({query}){ const q = norm(String(query || "")); setStatus(`찾는 중: ${query}`); return [...notes.values()].filter(n => norm(n.title).includes(q) || norm(n.body).includes(q)).slice(0, 10).map(n => ({title:n.title, type:n.type || "page", group:gOf(n), status:n.status || "진행중", snippet:(n.body || "").slice(0, 240)})); }},
+  {name:"read_note", description:"제목으로 노트 하나의 전체 본문, 종류, 분류, 상태, 연결을 읽어.",
+   inputSchema:{type:"object", properties:{title:{type:"string"}}, required:["title"]},
+   execute({title}){ const n = byTitle(String(title || "")); if (!n) throw new Error("그런 제목의 노트가 없어"); setStatus(`읽는 중: ${n.title}`); return {title:n.title, type:n.type || "page", group:gOf(n), status:n.status || "진행중", body:n.body || "", links_out:parseLinks(n.body), links_in:[...notes.values()].filter(o => o.id !== n.id && parseLinks(o.body).some(t => norm(t) === norm(n.title))).map(o => o.title)}; }},
+  {name:"create_note", description:"새 위키 노트를 만들어. 같은 제목이 있으면 실패하니 그땐 update_note를 써.",
+   inputSchema:{type:"object", properties:{title:{type:"string"}, group:{type:"string", enum:GIDS}, status:{type:"string", enum:STATUSES}, body:{type:"string"}}, required:["title", "body"]},
+   execute({title, group, status, body}){
+     if (readOnly) throw new Error("읽기 전용이라 못 만들어"); const t = String(title || "").trim(); if (!t) throw new Error("제목이 비었어"); if (byTitle(t)) throw new Error("같은 제목의 노트가 이미 있어");
+     const id = newId(), now = Date.now();
+     notes.set(id, {id, title:t, type:"page", group:GIDS.includes(String(group)) ? String(group) : "etc", status:STATUSES.includes(String(status)) ? String(status) : "진행중", body:String(body || ""), created:now, updated:now});
+     setStatus(`만드는 중: ${t}`); afterToolWrite(id, "생성"); return {created:t}; }},
+  {name:"update_note", description:"기존 위키 노트를 고쳐. body는 본문 전체 교체, append는 끝에 덧붙이기, group/status 변경, new_title은 이름 변경(다른 노트 링크도 같이 바뀜). 소스는 고칠 수 없어.",
+   inputSchema:{type:"object", properties:{title:{type:"string"}, body:{type:"string"}, append:{type:"string"}, group:{type:"string", enum:GIDS}, status:{type:"string", enum:STATUSES}, new_title:{type:"string"}}, required:["title"]},
+   execute({title, body, append, group, status, new_title}){
+     if (readOnly) throw new Error("읽기 전용이라 못 고쳐"); const n = byTitle(String(title || "")); if (!n) throw new Error("그런 제목의 노트가 없어"); if (isSource(n)) throw new Error("소스는 원본이라 고칠 수 없어");
+     setStatus(`고치는 중: ${n.title}`);
+     if (typeof body === "string") n.body = body;
+     if (typeof append === "string" && append.trim()) n.body = (n.body ? n.body.replace(/\s+$/, "") + "\n\n" : "") + append;
+     if (GIDS.includes(String(group))) n.group = String(group);
+     if (STATUSES.includes(String(status))) n.status = String(status);
+     if (typeof new_title === "string" && new_title.trim() && norm(new_title) !== norm(n.title)) { if (byTitle(new_title)) throw new Error("바꾸려는 제목이 이미 있어"); const old = n.title; n.title = new_title.trim(); renameRefs(n.id, old, n.title); }
+     afterToolWrite(n.id, "수정"); return {updated:n.title}; }},
+];
+function setStatus(t){ if (statusEl) { statusEl.textContent = t; statusEl.hidden = !t; } }
+function cErr(e){
+  const c = e && e.code;
+  if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(c)) { $("rTabClaude").hidden = true; return "이 보기에서는 Claude를 쓸 수 없어요."; }
+  if (c === "tools_unavailable") { toolsOK = false; renderComposer(); return "여기선 노트 수정 도구를 못 써요. 다시 보내면 읽기만 해서 답해요."; }
+  if (c === "rate_limited") return "요청이 많아요. 잠깐 뒤에 다시 보내 주세요.";
+  if (c === "session_expired") return "로그인이 만료됐어요. 다시 로그인해 주세요.";
+  if (c === "prompt_too_large") return "내용이 너무 길어요. 원문을 나눠서 넣어 주세요.";
+  if (c === "refused") return "이 요청에는 답하지 않았어요. 방식을 바꿔 물어봐 주세요.";
+  if (c === "empty_completion") return "답이 비어 있어요. 더 구체적으로 물어봐 주세요.";
+  return "답을 끝까지 받지 못했어요. 다시 해 보세요.";
+}
+function setBusy(v){ busy = v; const b = $("cSend") || $("iSend") || $("lSend"); if (b) b.textContent = v ? "멈춤" : (b.id === "cSend" ? "보내기" : b.id === "iSend" ? "넣고 정리" : "점검 시작"); }
+async function run(userLabel, userText, content, {full = false, useTools = toolsOK, saveable = false, question = ""} = {}){
+  if (!sample || busy) return null;
+  const log = $("cLog"); log.querySelector(".c-intro")?.remove();
+  const u = document.createElement("div"); u.className = "msg me";
+  if (userLabel) { const l = document.createElement("span"); l.className = "lbl"; l.textContent = userLabel; u.appendChild(l); }
+  u.appendChild(document.createTextNode(userText)); log.appendChild(u);
+  const b = document.createElement("div"); b.className = "msg bot";
+  statusEl = document.createElement("span"); statusEl.className = "status"; statusEl.textContent = "생각하는 중";
+  const body = document.createElement("div"); b.append(statusEl, body); log.appendChild(b);
+  $("cBody").scrollTop = $("cBody").scrollHeight;
+  turns.push({role:"user", content}); while (turns.length > 14) turns.shift(); if (turns[0]?.role !== "user") turns.shift();
+  setBusy(true); ctl = new AbortController();
+  const opts = {signal:ctl.signal, onText:({text}) => { setStatus(""); mdMsg(body, text); $("cBody").scrollTop = $("cBody").scrollHeight; }};
+  if (useTools) opts.tools = TOOLS; else opts.cache = false;
+  let result = null;
+  try {
+    const res = await sample([{role:"user", content:schema(full)}, ...turns], opts);
+    setStatus(""); mdMsg(body, res.text); turns.push({role:"assistant", content:res.text}); result = res.text;
+    if (res.truncated) b.insertAdjacentHTML("beforeend", `<span class="err">답이 길어서 중간에 끊겼어요.</span>`);
+    if (saveable && !readOnly) {
+      const acts = document.createElement("div"); acts.className = "acts";
+      const sv = document.createElement("button"); sv.className = "btn xs line"; sv.textContent = "노트로 저장";
+      sv.onclick = () => { const t = uniqueTitle("질문: " + question.slice(0, 22).trim()); createNote(t, {group:"etc", status:"완료", body:`> ${question}\n\n${res.text}\n\n#질문`, silent:true, logDetail:"질문 답을 저장"}); sv.disabled = true; sv.textContent = "저장했어요"; toast(`'${t}' 노트로 저장했어요`); };
+      acts.appendChild(sv); b.appendChild(acts);
+    }
+  } catch (e) {
+    setStatus("");
+    if (e && e.code === "refused") body.textContent = ""; else if (e && e.text) mdMsg(body, e.text);
+    if (e && e.code === "cancelled") { if (!body.textContent) body.textContent = "멈췄어요."; }
+    else b.insertAdjacentHTML("beforeend", `<span class="err">${H(cErr(e))}</span>`);
+  } finally { setBusy(false); ctl = null; statusEl = null; $("cBody").scrollTop = $("cBody").scrollHeight; }
+  return result;
+}
+function ask(q){ openClaude(); if (cMode !== "ask") setMode("ask"); run("", q, q, {saveable:true, question:q}); }
+async function ingest(title, raw, group){
+  if (readOnly) { toast("보기 전용이라 소스를 넣을 수 없어요"); return; }
+  const now = new Date(), t = uniqueTitle(title || `소스 ${now.getMonth() + 1}월 ${now.getDate()}일 ${now.getHours()}시 ${String(now.getMinutes()).padStart(2, "0")}분`);
+  createNote(t, {type:"source", group, status:"완료", body:raw, silent:true, logDetail:"소스 추가"});
+  $("iTitle").value = ""; $("iBody").value = "";
+  const content = `새 소스 [[${t}]]를 위키에 반영해줘.
+
+할 일
+1. 소스에서 중요한 사실, 결정, 할 일을 뽑아.
+2. 관련 위키 노트를 찾아서 고치고(update_note), 없으면 새로 만들어(create_note). 중복 만들지 마.
+3. 고치거나 만든 노트에는 근거로 [[${t}]]를 달아.
+4. 기존 노트와 소스가 부딪히면 둘 다 남기고 '확인 필요'로 표시해.
+5. 끝나면 바꾼 노트 목록을 [[제목]]으로 짧게 알려줘.
+
+소스 원문
+---
+${raw.slice(0, 20000)}
+---`;
+  await run("소스 넣기", t, content, {useTools:toolsOK});
+  addLog("소스 반영", t, "Claude가 위키에 반영");
+}
+async function runLint(){
+  if (cMode !== "lint") setMode("lint");
+  const L = lintData();
+  const content = `위키 전체 점검해줘. 노트는 고치지 말고 보고만 해.
+
+찾을 것
+- 노트끼리 서로 모순되는 내용
+- 계획이 바뀐 뒤에도 옛날 내용이 남은 노트 (예: 내신 목표, 희망 대학 순위, 선택과목)
+- 근거 소스 없이 적힌 사실, 확인이 필요한 사실
+- 이어져야 하는데 링크가 빠진 노트
+
+규칙으로 이미 찾은 것 (참고): 없는 노트 링크 ${L.ghosts.length}개, 연결 없는 노트 ${L.orphans.length}개, 인용 안 된 소스 ${L.uncitedSrc.length}개, 확인 필요 ${L.check.length}개.
+
+형식: 항목마다 [[노트]] 이름과 이유 한 줄. 마지막에 먼저 고칠 것 3개.`;
+  await run("내용 점검", "위키 전체 점검", content, {full:true, useTools:false});
+  addLog("점검", "위키 전체", "Claude 내용 점검");
+}
+
+// ============ keyboard ============
+document.addEventListener("keydown", e => {
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod && /^[kKoO]$/.test(e.key)) { e.preventDefault(); openPalette(); return; }
+  if (mod && /^[eE]$/.test(e.key) && active !== "graph") { e.preventDefault(); toggleEdit(); return; }
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || "");
+  if (e.key === "Escape" && !typing) { if (!$("scrim").hidden) closePalette(); else if (!$("displayPop").hidden) $("displayPop").hidden = true; else if (tagFilter) { tagFilter = ""; renderLeft(); } else if (active === "graph") select(null); }
+  if (typing || mod) return;
+  if (e.key === "/") { e.preventDefault(); openPalette(); }
+  else if (/^[nN]$/.test(e.key) && !readOnly) { e.preventDefault(); createNote(); }
+  else if (/^[gG]$/.test(e.key)) activate("graph");
+  else if (e.key === "0" && active === "graph") fit();
+});
+
+// ============ boot ============
+function applyIncoming(id, d){
+  if (editedAt[id] && Date.now() - editedAt[id] < 3000) return false;
+  const ts = v => typeof v === "number" ? v : (Date.parse(v) || 0);
+  const group = GIDS.includes(d.group) ? d.group : (FOLDER_TO_GROUP[d.folder] || "etc");
+  notes.set(id, {id, title:String(d.title || "제목 없음"), type:d.type === "source" ? "source" : "page", group, status:STATUSES.includes(d.status) ? d.status : "진행중", date:String(d.date || ""), body:String(d.body || ""), created:ts(d.created) || ts(d.updated), updated:ts(d.updated)});
+  return true;
+}
+function startLocal(){
+  mode = "local";
+  try { JSON.parse(localStorage.getItem(LS_NOTES) || "[]").forEach(n => n && n.id && notes.set(n.id, n)); } catch (e) {}
+  try { logEntries = JSON.parse(localStorage.getItem(LS_LOG) || "[]"); } catch (e) { logEntries = []; }
+  rebuild(); renderLegend(); renderLeft(); renderRight(); setTimeout(() => fit(), 900); setTimeout(() => { if (!userMoved) fit(); }, 2600);
+}
+async function boot(){
+  renderTabs(); renderLegend(); renderLeft(); renderRight();
+  requestAnimationFrame(draw);
+  if (!window.claude || typeof window.claude.use !== "function") { startLocal(); return; }
+  bootClaude();
+  try { db = await window.claude.use("db"); } catch (e) { db = null; }
+  if (!db) { startLocal(); return; }
+  mode = "db";
+  try { const user = await window.claude.use("user"); if (user) { const w = await user.can("data.write"); if (w === false) setRO(true); } } catch (e) {}
+  let first = true;
+  db.collection("notes").onSnapshot(snap => {
+    let touchedActive = false;
+    snap.docChanges().forEach(ch => {
+      const id = ch.doc.id;
+      if (ch.type === "removed") { if (!(editedAt[id] && Date.now() - editedAt[id] < 3000)) notes.delete(id); if (id === active) touchedActive = true; }
+      else if (applyIncoming(id, ch.doc.data() || {}) && (id === active || id === selectedId)) touchedActive = true;
+    });
+    rebuild(); renderLegend(); refreshAll(); renderTabs();
+    if (touchedActive) { const a = document.activeElement; if (active !== "graph" && !(a && (a.id === "dTitle" || a.id === "dText"))) renderDoc(); renderRight(); }
+    else if (first) renderRight();
+    if (first) { first = false; setTimeout(() => fit(), 900); setTimeout(() => { if (!userMoved) fit(); }, 2600); }
+  }, () => toast("노트를 실시간으로 받지 못하고 있어요. 새로고침해 주세요"));
+  db.collection("log").orderBy("at", "desc").limit(150).onSnapshot(snap => { logEntries = snap.docs.map(d => d.data() || {}).filter(e => e.at); if (leftTab === "log") renderLeft(); }, () => {});
+}
+boot();
+})();
+</script>
