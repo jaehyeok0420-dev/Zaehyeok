@@ -961,7 +961,7 @@ function importBlocks(text){
 }
 function exportText(){
   const d = new Date(), day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  let s = `# 재혁 Vault 전체 노트 (${day} 기준)\n\n노트끼리는 [[노트 제목]]으로 연결돼 있어요. 새 기록은 === NOTE === 형식으로 정리해 Vault의 '연동' 탭에 붙여넣어요.\n`;
+  let s = `# 재혁 Vault 전체 노트 (${day} 기준)\n\n노트끼리는 [[노트 제목]]으로 연결돼 있어요.\n`;
   GROUPS.forEach(g => {
     const list = [...notes.values()].filter(n => gOf(n) === g.id).sort((a, b) => (a.date || "").localeCompare(b.date || "") || a.title.localeCompare(b.title, "ko"));
     if (!list.length) return;
@@ -974,8 +974,8 @@ let downloads = null;
 function renderSync(el){
   const w = document.createElement("div"); w.className = "sync";
   w.innerHTML = `<h2>프로젝트 → Vault</h2>
-    <p>대학 프로젝트 채팅이 정리한 <code>=== NOTE ===</code> 블록을 그대로 붙여넣으세요. 같은 제목은 고치고, 없으면 새로 만들어요.</p>
-    <label class="sr-only" for="syncIn">노트 블록</label><textarea id="syncIn" placeholder="=== NOTE ===&#10;title: …&#10;folder: 창체&#10;date: 2026-10&#10;---&#10;## 무엇을 했나&#10;- …"></textarea>
+    <p>프로젝트 채팅의 답이나 새로 생긴 기록(세특, 활동, 성적 등)을 그대로 붙여넣으세요. Claude가 읽고 노트로 정리해 연결해요.</p>
+    <label class="sr-only" for="syncIn">노트 블록</label><textarea id="syncIn" placeholder="여기에 붙여넣기"></textarea>
     <div class="row"><button class="btn sm fill" id="syncGo" ${readOnly ? "disabled" : ""}>Vault에 넣기</button></div>
     <div id="syncRes"></div>
     <h2 style="margin-top:22px">Vault → 프로젝트</h2>
@@ -985,7 +985,13 @@ function renderSync(el){
   el.appendChild(w);
   $("syncGo").onclick = () => {
     const r = importBlocks($("syncIn").value), box = $("syncRes");
-    if (!r) { box.innerHTML = `<p class="res">노트 블록을 찾지 못했어요. <code>=== NOTE ===</code>로 시작하는지 확인해 주세요.</p>`; return; }
+    if (!r) {
+      // plain text: hand it to Claude's source intake, which files and links it
+      const raw = $("syncIn").value.trim(); if (!raw) { toast("붙여넣을 내용이 없어요"); return; }
+      if (!sample) { box.innerHTML = `<p class="res">이 보기에서는 Claude를 쓸 수 없어요. claude.ai에서 Vault를 열어 주세요.</p>`; return; }
+      openClaude("ingest"); $("iBody").value = raw; $("syncIn").value = "";
+      box.innerHTML = `<p class="res">오른쪽 Claude 탭에 옮겼어요. 제목을 적고 <b>넣고 정리</b>를 누르세요.</p>`; return;
+    }
     $("syncIn").value = "";
     box.innerHTML = `<p class="res"><b>새로 ${r.added}개, 고침 ${r.updated}개</b>${r.ghosts.length ? `<br>아직 없는 노트로 가는 링크: ${r.ghosts.map(H).join(", ")}` : ""}</p>`;
     toast(`노트 ${r.added + r.updated}개를 반영했어요`);
